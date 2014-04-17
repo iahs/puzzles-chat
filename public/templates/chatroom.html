@@ -1,0 +1,29 @@
+<h1>Chatroom directive</h1>
+<div class="form-group">
+    <div class="input-group">
+        <span class="input-group-addon">Username:</span>
+        <input ng-model="newMessage.sender" type="text" placeholder="Prepend" class="form-control" />
+    </div>
+</div>
+
+<ul class="list-group">
+    <li ng-repeat="message in messages" class="list-group-item" ng-class="message.class">
+        <span>{{ message.sender }}</span>:
+        {{ message.title }}
+    </li>
+</ul>
+
+<form role="form" ng-submit="sendMessage()">
+    <div class="form-group">
+        <input ng-model="newMessage.title" type="text" placeholder="Message..." class="form-control"/>
+    </div>
+    <button class="btn btn-primary">Send message</button>
+</form>
+
+<br/>
+<form role="form" ng-submit="joinRoom()" class="well">
+    <div class="form-group">
+        <input ng-model="room.name" type="text" placeholder="Room name" class="form-control"/>
+    </div>
+    <button class="btn btn-info">Join Room</button>
+</form>

@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    chatroom
+    quiz
+    responsebox
+    .clearfix(ng-controller='PlotController')
+        highchart#demo-chart(config='chartConfig')
+        button.btn.btn-primary(ng-repeat='type in chartTypes', ng-click='addSeries(type.id)') {{ type.title }}

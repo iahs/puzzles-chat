@@ -1,0 +1,14 @@
+extends layout
+block content
+    h1 Signup
+    if message && message != ""
+        .alert.alert-error= message
+    form(role="form" action="/signup" method="post")
+        .form-group
+            label Email
+            input(type="text" class="form-control" name="email")
+        .form-group
+            label Password
+            input(type="password" class="form-control" name="password")
+        button.btn.btn-primary(type="submit") Signup
+        a.btn(href="/signup") Log in
