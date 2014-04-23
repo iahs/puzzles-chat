@@ -15,6 +15,7 @@
         "connect-flash": "*",
         "cookie-session": "*",
         "express-session": "*",
-        "cookie-parser": "*"
+        "cookie-parser": "*",
+        "socket.io": "*"
     }
 }
