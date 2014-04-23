@@ -1,0 +1,6 @@
+.active {
+    background: #1abc9c;
+}
+.active a, .active a:hover {
+    color: white
+}

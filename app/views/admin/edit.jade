@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+    h1 Edit
+    form(role="form", method="POST", action="/admin/quiz/#{quiz.permalink}")
+        input(type="hidden", name="_method", value="PUT")
+        .form-group
+            label(for="name") Name
+            input.form-control(name="name", id="name", value="#{quiz.name}")
+        input.btn(type="submit", value="Update")

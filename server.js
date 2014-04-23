@@ -60,3 +60,4 @@ require('./app/sockets.js')(io);
  * Load and initialize routes
  **************************/
 require('./app/routes.js')(app, passport);
+require('./app/adminroutes.js')(app);

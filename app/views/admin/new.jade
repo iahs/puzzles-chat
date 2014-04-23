@@ -1,0 +1,14 @@
+// Create a new Quiz
+extends ../layout
+block content
+    h1 Not found
+    p There is no quiz at this url. Do you want to create a new one?
+    | Enter a title and description here, then add questions on the next page.
+    form(role="form", method="POST", action="/admin/quiz/#{permalink}")
+        .form-group
+            label(for="title") Title
+            input.form-control(name="title", id="title")
+        .form-group
+            label(for="description") Description
+            textarea.form-control(name="description", id="description")
+        input.btn.btn-primary(type="submit", value="Create")
