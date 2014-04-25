@@ -17,9 +17,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
                 if ($scope.newMessage.title != "") {
                     $scope.newMessage.topic = $scope.activeTopic;
                     socket.emit('chatclient:message', $scope.newMessage);
-                    var newMsg = angular.copy($scope.newMessage);
-                    newMsg.class = "list-group-item-success";
-                    $scope.topics[$scope.activeTopic].messages.push(newMsg);
                     $scope.newMessage.title = "";
                 }
             };
@@ -27,17 +24,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             // Create a new topic
             $scope.createTopic = function() {
                 if ($scope.newTopic.title != "") {
-                    $scope.newTopic.index = $scope.nTopics++;
-                    $scope.newTopic.messages = [];
                     socket.emit('chatclient:topic', $scope.newTopic);
-                    var newTopic = angular.copy($scope.newTopic);
-                    newTopic.class = "list-group-item-success";
-                    console.log($scope.topics)
-                    $scope.topics[newTopic.index]=newTopic;
-                    $scope.chooseTopic(newTopic.index);
-                    // Scroll to new topic
-                    $location.hash('topic-' + newTopic.index);
-                    $anchorScroll();
                     $scope.newTopic.title = "";
                 }
             };
@@ -61,12 +48,16 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             // Receive a topic
             socket.on('server:topic', function(topic) {
                 $scope.topics.push(topic);
-                $scope.nTopics++;
+                if(topic.isOwn) {
+                    $scope.chooseTopic(topic.index);
+                    // Scroll to new topic
+                    $location.hash('topic-' + topic.index);
+                    $anchorScroll();
+                }
             });
 
-            // Sync topic count
+            // Sync topics
             socket.on('server:roomStatus', function(data){
-                $scope.nTopics=data.length;
                 $scope.topics=data;
             });
 

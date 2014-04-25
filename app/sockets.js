@@ -28,15 +28,21 @@ module.exports = function (io) {
         });
 
         socket.on('chatclient:message', function(data) {
-            console.log('message received ' + data['title']);
+            console.log('message received ' + data.title);
             socket.broadcast.to(currentRoom.name).emit('server:message', data);
+            socket.emit('server:message', data); // Send message to sender
             rooms[currentRoom.name][data.topic].messages.push(data);
         });
 
         socket.on('chatclient:topic', function(data) {
-            console.log('topic received ' + data['title']);
+            console.log('topic received ' + data.title);
+            data.index = rooms[currentRoom.name].length;
+            data.messages = [];
             socket.broadcast.to(currentRoom.name).emit('server:topic', data);
             rooms[currentRoom.name].push(data);
+            // Send topic to sender
+            data.isOwn = true;
+            socket.emit('server:topic', data);
         });
 
         // TODO: remove this. Just for demo purposes
@@ -81,7 +87,7 @@ module.exports = function (io) {
         socket.on('admin:addAlternative', function (question, alternative) {
             // Add a new alternative to the question
         });
-        
+
     });
 };
 
