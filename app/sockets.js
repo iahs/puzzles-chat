@@ -65,7 +65,7 @@ module.exports = function (io) {
                 .exec(function (err, quiz) {
                     quiz.questions.push(question);
                     quiz.save(function () {
-                        socket.emit('admin:questionAdded', quiz.questions[quiz.questions.length - 1]);
+                        socket.emit('admin:questionChange', question);
                     });
                 });
         });

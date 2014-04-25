@@ -1,7 +1,6 @@
 var Quiz = require('../app/models/quiz.js'),
     Question = require('../app/models/question.js');
 
-
 module.exports = function(app) {
     /**
      * List a users quizzes, profile, and recently answered questions
@@ -21,6 +20,7 @@ module.exports = function(app) {
     app.get('/admin/quiz/:permalink', function (req, res) {
         Quiz.findOne({permalink: req.params.permalink}).exec(function(err, quiz) {
            if (quiz) {
+               // TODO: add authentication here to check that user is admin for quiz
                res.render('admin/show');
            } else {
                res.render('admin/new', {permalink: req.params.permalink });
@@ -34,21 +34,11 @@ module.exports = function(app) {
     app.get('/admin/quiz/:permalink/edit', function (req, res) {
         Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
             if (quiz) {
+                // TODO: add authentication here to check that user is admin for quiz
                 res.render('admin/edit', {quiz: quiz});
             } else {
                 res.redirect('admin/quiz/' + req.params.permalink);
             };
-        });
-    });
-
-    app.get('/admin/quiz/:permalink/addquestion', function (req, res) {
-        Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
-            var q = new Question();
-            q.question = "What is the answer to life, universe and everything?";
-            quiz.questions.push(q);
-            quiz.save(function (err) {
-                res.send(quiz);
-            });
         });
     });
 
@@ -73,6 +63,7 @@ module.exports = function(app) {
 
     /**
      * Update an existing quiz
+     * TODO: move to sockets
      */
     app.put('/admin/quiz/:permalink', function (req, res) {
         console.log("PUT", req.body.name);

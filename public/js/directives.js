@@ -24,7 +24,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
                 }
             };
 
-
             // Create a new topic
             $scope.createTopic = function() {
                 if ($scope.newTopic.title != "") {
@@ -69,7 +68,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             socket.on('server:roomStatus', function(data){
                 $scope.nTopics=data.length;
                 $scope.topics=data;
-                console.log(data)
             });
 
         }
@@ -77,10 +75,10 @@ angular.module('nodePuzzles').directive('chatroom', function () {
 });
 
 
+
 /**
- * Simple directive to display a chatroom. For now, one global chatroom
- * that all clients connect to.
- * usage: add <chatroom></chatroom> in the html file
+ * Directive to display modal for adding new questions
+ * Not finished yet
  */
 angular.module('nodePuzzles').directive('questionResults', function () {
     return {
@@ -109,6 +107,24 @@ angular.module('nodePuzzles').directive('questionResults', function () {
                 },
                 loading: false
             };
+
         }
-    }
+    };
+});
+
+
+
+/**
+ * Directive to display modal for adding new questions
+ * Not finished yet
+ */
+angular.module('nodePuzzles').directive('addquestionmodal', function () {
+    return {
+        restrict: 'E',
+        templateUrl: '/templates/addquestion_modal.html',
+        scope: {},
+        controller: function ($scope) {
+
+        }
+    };
 });

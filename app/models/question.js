@@ -3,22 +3,20 @@ var mongoose = require('mongoose') || "ERROR", // hack for my IDE auto-completio
 
 var answerSchema = mongoose.Schema({
     // Ref to user here
-    answer: String,
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-
+    created: { type : Date, default: Date.now }
 });
-var Answer = mongoose.model('Answer', answerSchema);
 
-// Define database schema
-var questionSchema = mongoose.Schema({
-
-    question: String,
-    alternatives: [String],
+var alternativeSchema = mongoose.Schema({
+    name: String,
+    isCorrect: Boolean,
     answers: [answerSchema]
-
 });
 
-
+var questionSchema = mongoose.Schema({
+    question: String,
+    alternatives: [alternativeSchema]
+});
 
 module.exports = mongoose.model('Question', questionSchema);
 

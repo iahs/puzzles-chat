@@ -1,6 +1,5 @@
 // Define the AngularJS application
-var app = angular.module('nodePuzzles',
-    ['highcharts-ng']);
+var app = angular.module('nodePuzzles', ['highcharts-ng']);
 
 // TODO: remove plotcontroller, only for demo purposes
 app.controller('PlotController', function ($scope, socket) {
@@ -57,13 +56,15 @@ app.controller('PlotController', function ($scope, socket) {
 });
 
 app.controller('AdminPanelController', function ($scope, socket) {
-
     // The array must NOT be replaced. The questionResult directive depends on it for plotting.
     $scope.answers = [];
 
-    /**
-     * Listen for server events
-     */
+    // A reference to the question the user is currently viewing
+    $scope.visibleQuestion = {};
+
+    // A reference to the quiz object of the page
+    $scope.quiz = {};
+
     // Get current quiz from the server
     socket.emit('admin:init');
     socket.on('admin:initdata', function (quiz) {
@@ -71,10 +72,20 @@ app.controller('AdminPanelController', function ($scope, socket) {
         $scope.visibleQuestion = $scope.quiz.questions[0];
     });
 
-    // A new question has been added to the quiz
-    socket.on('admin:questionAdded', function (question) {
-       $scope.quiz.questions.push(question);
+    // Easier to replace the question than targeting specific values, and only one function necessary
+    socket.on('admin:questionChange', function (question) {
+        var questionUpdated = false;
+        for (var i=0; i<$scope.quiz.questions.length; i++) {
+            if ($scope.quiz.questions[i]._id === question._id) {
+                // Update the object
+                $scope.questions[i] = question;
+                questionUpdated = true;
+            }
+        }
+        if (!questionUpdated)
+            $scope.quiz.questions.push(question);
     });
+
 
     // Change the question in view
     $scope.viewQuestion = function(question) {
@@ -93,9 +104,9 @@ app.controller('AdminPanelController', function ($scope, socket) {
         // And fill in new data
         for (var i=0; i<newAnswers.length; i++) {
             $scope.answers.push(newAnswers[i]);
-        }
+        };
+        console.log($scope.answers);
     };
-
 
     // TODO: remove this when real functionality for updating graph is in place
     $scope.plusOne = function () {
@@ -103,11 +114,11 @@ app.controller('AdminPanelController', function ($scope, socket) {
     };
 
     // Create a new question for the current quiz
-    // Todo: move to directive?
+    // Todo: move to directive with view?
     $scope.newQuestion = {
         alternatives: [],
         addAlternative: function () {
-            this.alternatives.push({name: "Content here", isCorrect: false });
+            this.alternatives.push({ name: "Content here", isCorrect: false, answers: [] });
         },
         removeAlternative: function (alt) {
             var a = this.alternatives;
@@ -119,6 +130,7 @@ app.controller('AdminPanelController', function ($scope, socket) {
             };
         },
         submit: function () {
+            console.log(JSON.stringify(this));
             socket.emit('admin:addQuestion', this);
         }
     };

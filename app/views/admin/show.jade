@@ -5,28 +5,31 @@ block content
         .col-lg-3
             ul.list-group
                 h3.list-group-item-heading Questions
-                li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question==openQuestion}")
+                li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question===visibleQuestion}")
                     a(ng-click="viewQuestion(question)") {{ question.question }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
         .col-lg-9
             nav.navbar.navbar-default(role="navigation")
-
                 .navbar-header
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                     a(href="#" class="navbar-brand") Actions
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-default.navbar-btn(ng-click="actions.activateQuestion()")  Activate question
-                    button.btn.btn-default.navbar-btn(ng-click="actions.activateChat()") Activate chat
-                    button.btn.btn-default.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
+                    button.btn.btn-success.navbar-btn(ng-click="actions.activateQuestion()") Activate question
+                    button.btn.btn-info.navbar-btn(ng-click="actions.activateChat()") Activate chat
+                    button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
                     button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
             h2  {{ quiz.name  }}
             p {{ visibleQuestion.question }}
+            h4 Alternatives
+            ul
+                li(ng-repeat="alt in visibleQuestion.alternatives") {{alt.name}} ({{alt.answers.length}})
+            button.btn(ng-click="addAlternative()") Add alternative
 
-            h3 Some way to display answers here
             question-results(answers="answers")
             button.btn(ng-click="plusOne()") Click me
             chatroom
             responsebox
+
 
         #addQuestion.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
             .modal-dialog
