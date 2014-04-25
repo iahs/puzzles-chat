@@ -18,11 +18,10 @@ module.exports = function(app) {
     /**
      * Manage a quiz
      */
-    app.get('/admin/quiz/:permalink', isLoggedIn, function (req, res) {
+    app.get('/admin/quiz/:permalink', function (req, res) {
         Quiz.findOne({permalink: req.params.permalink}).exec(function(err, quiz) {
-
            if (quiz) {
-               res.render('admin/show', {quiz: quiz});
+               res.render('admin/show');
            } else {
                res.render('admin/new', {permalink: req.params.permalink });
            };

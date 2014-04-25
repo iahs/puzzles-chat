@@ -1,38 +1,55 @@
 extends ../layout
 
 block content
-    #admin(ng-controller="AdminPanelController", ng-init="init(#{JSON.stringify(quiz)})")
+    #admin(ng-controller="AdminPanelController")
         .col-lg-3
             ul.list-group
                 h3.list-group-item-heading Questions
                 li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question==openQuestion}")
-                    a(ng-click="activateQuestion(question)") {{ question.question }}
-            button.btn.btn-primary Add question
+                    a(ng-click="viewQuestion(question)") {{ question.question }}
+            button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
         .col-lg-9
-            h1 #{quiz.name} (Angular: {{ quiz.name | uppercase }} )
-            nav.navbar.navbar-inverse.navbar-embossed(role="navigation")
+            nav.navbar.navbar-default(role="navigation")
+
                 .navbar-header
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                     a(href="#" class="navbar-brand") Actions
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-default.navbar-btn Activate question
-                    button.btn.btn-default.navbar-btn Activate chat
-                    button.btn.btn-default.navbar-btn Detailed responses
-                    button.btn.btn-default.navbar-btn Add admin
+                    button.btn.btn-default.navbar-btn(ng-click="actions.activateQuestion()")  Activate question
+                    button.btn.btn-default.navbar-btn(ng-click="actions.activateChat()") Activate chat
+                    button.btn.btn-default.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
+                    button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
+            h2  {{ quiz.name  }}
+            p {{ visibleQuestion.question }}
 
-            p Mr. Black, Mr. Gray, and Mr. White are fighting in a truel. They each get a gun and take turns shooting at each other until only one person is left. Mr. Black, who hits his shot 1/3 of the time, gets to shoot first. Mr. Gray, who hits his shot 2/3 of the time, gets to shoot next, assuming he is still alive. Mr. White, who hits his shot all the time, shoots next, assuming he is also alive. The cycle repeats. If you are Mr. Black, where should you shoot first for the highest chance of survival?
+            h3 Some way to display answers here
+            question-results(answers="answers")
+            button.btn(ng-click="plusOne()") Click me
+            chatroom
+            responsebox
 
-            .well
-                label.radio
-                    input(type="radio" name="group1" value="1" data-toggle="radio")
-                    span Mr. Gray
+        #addQuestion.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                        h4#myModalLabel.modal-title Add question
+                    .modal-body
+                        form(role="form")
+                            legend Question
+                            .form-group
+                                input.form-control(placeholder="name", ng-model="newQuestion.name")
+                            .form-group
+                                textarea.form-control(placeholder="question", ng-model="newQuestion.question")
+                            legend Alternatives
+                            .form-group(ng-repeat="alt in newQuestion.alternatives")
+                                input.form-control(ng-model="alt.name", placeholder="Enter value here")
+                                label(class="checkbox")
+                                    input(type="checkbox" ng-model="alt.isCorrect")
+                                    | Is correct
+                                button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
+                            button.btn(ng-click="newQuestion.addAlternative()") Add alternative
 
-                label.radio
-                    input(type="radio" name="group1" value="2" data-toggle="radio" checked)
-                    span Mr. White
-
-                label.radio
-                    input(type="radio" name="group1" value="2" data-toggle="radio" checked)
-                    span Mr. Black
-
-            highchart#demo-chart(config="chartConfig")
+                    .modal-footer
+                        button.btn.btn-default(type='button', data-dismiss='modal') Close
+                        button.btn.btn-primary(ng-click="newQuestion.submit()") Add question

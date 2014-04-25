@@ -1,3 +1,5 @@
+var Quiz = require('./models/quiz'),
+    Question = require('./models/question');
 /**
  * Socket.io configuration
  */
@@ -20,6 +22,8 @@ module.exports = function (io) {
             socket.join(room.name);
             currentRoom = room;
 
+            console.log("CLIENT JOINED ROOM: " + currentRoom);
+
             socket.emit('server:message', {title: "You have joined " + room.name, sender: "RoomManager"});
         });
 
@@ -35,13 +39,49 @@ module.exports = function (io) {
             rooms[currentRoom.name].push(data);
         });
 
+        // TODO: remove this. Just for demo purposes
         socket.on('chartclient:series', function(data) {
             io.sockets.to(currentRoom.name).emit('chart:series', data);
         });
 
-        socket.on('debug', function(data) {
-            console.log('debug: ' + data);
+        /**
+         * Admin interface and commands
+         */
+        socket.on('admin:init', function () {
+            Quiz.findOne( { permalink: "ogga" })
+                .exec(function (err, quiz) {
+                    if (err) socket.emit("ERROR");
+                    socket.emit( 'admin:initdata', quiz );
+                });
         });
+
+        socket.on('admin:activateQuestion', function () {
+           // Activate the requested question, dectivate the current.
+        });
+
+        socket.on('admin:addQuestion', function (question) {
+            // TODO: format the question properly before pushing it into the database
+            Quiz.findOne( {permalink: "ogga" })
+                .exec(function (err, quiz) {
+                    quiz.questions.push(question);
+                    quiz.save(function () {
+                        socket.emit('admin:questionAdded', quiz.questions[quiz.questions.length - 1]);
+                    });
+                });
+        });
+
+        socket.on('admin:removeQuestion', function () {
+
+        });
+
+        socket.on('admin:setChatStatus', function (status) {
+            // Activate or deactivate stat
+        });
+
+        socket.on('admin:addAlternative', function (question, alternative) {
+            // Add a new alternative to the question
+        });
+        
     });
 };
 

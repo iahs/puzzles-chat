@@ -3,7 +3,6 @@ app.factory('socket', function ($rootScope) {
     return {
         init: function () {
           socket.removeAllListeners();
-            
         },
         on: function (eventName, callback) {
             socket.on(eventName, function () {

@@ -6,7 +6,7 @@
 angular.module('nodePuzzles').directive('chatroom', function () {
     return {
         restrict: 'E',
-        templateUrl: 'templates/chatroom.html',
+        templateUrl: '/templates/chatroom.html',
         scope: {},
         controller: function ($scope, $element, $attrs, socket, $location, $anchorScroll, $timeout) {
             $scope.newMessage = {sender: "Anonymous"};
@@ -72,6 +72,43 @@ angular.module('nodePuzzles').directive('chatroom', function () {
                 console.log(data)
             });
 
+        }
+    }
+});
+
+
+/**
+ * Simple directive to display a chatroom. For now, one global chatroom
+ * that all clients connect to.
+ * usage: add <chatroom></chatroom> in the html file
+ */
+angular.module('nodePuzzles').directive('questionResults', function () {
+    return {
+        restrict: 'E',
+        templateUrl: '/templates/question_results.html',
+        scope: {
+            answers: '='
+        },
+        controller: function ($scope) {
+
+            $scope.chartConfig = {
+                options: {
+                    chart: {
+                        type: 'bar'
+                    }
+                },
+                xAxis: {
+                    labels:
+                    {
+                        enabled: false
+                    }
+                },
+                series: $scope.answers,
+                title: {
+                    text: 'Answers'
+                },
+                loading: false
+            };
         }
     }
 });

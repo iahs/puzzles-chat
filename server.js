@@ -27,7 +27,7 @@ var app = express(),
  * Middleware handlers
  * Load and initialize sockets
  **************************/
-app.use(logger());
+// app.use(logger());
 app.use(cookieParser());
 app.use(bodyParser());
 app.use(session( { secret: "keyboard cat" } ));

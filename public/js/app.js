@@ -2,6 +2,7 @@
 var app = angular.module('nodePuzzles',
     ['highcharts-ng']);
 
+// TODO: remove plotcontroller, only for demo purposes
 app.controller('PlotController', function ($scope, socket) {
 
     // Graphing system
@@ -55,63 +56,79 @@ app.controller('PlotController', function ($scope, socket) {
     };
 });
 
-app.controller('AdminPanelController', function ($scope) {
+app.controller('AdminPanelController', function ($scope, socket) {
 
-    // Take data from the back end renderer
-    $scope.init = function (quiz) {
+    // The array must NOT be replaced. The questionResult directive depends on it for plotting.
+    $scope.answers = [];
+
+    /**
+     * Listen for server events
+     */
+    // Get current quiz from the server
+    socket.emit('admin:init');
+    socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;
+        $scope.visibleQuestion = $scope.quiz.questions[0];
+    });
+
+    // A new question has been added to the quiz
+    socket.on('admin:questionAdded', function (question) {
+       $scope.quiz.questions.push(question);
+    });
+
+    // Change the question in view
+    $scope.viewQuestion = function(question) {
+        $scope.visibleQuestion = question;
+
+        // TODO: change this into using the question data when we get data for questions
+        var newAnswers = [
+            { data: [5], name: "Alt. 1" },
+            { data: [6], name: "Alt. 2" },
+            { data: [12], name: "Alt. 3" },
+            { data: [1], name: "Alt. 4" }
+        ];
+        // Remove the existing data
+        while ($scope.answers.length > 0 )
+            $scope.answers.pop();
+        // And fill in new data
+        for (var i=0; i<newAnswers.length; i++) {
+            $scope.answers.push(newAnswers[i]);
+        }
     };
 
-    $scope.questions = [
-        { question: "Question 1"},
-        { question: "Question 2"},
-        { question: "Question 3"},
-        { question: "Question 4"},
-        { question: "Question 5"}
-    ];
 
-    // Store a reference to the current active question
-    $scope.openQuestion = null;
+    // TODO: remove this when real functionality for updating graph is in place
+    $scope.plusOne = function () {
+       $scope.answers[0].data[0] += 1;
+    };
 
-    $scope.activateQuestion = function (question) {
-        // TODO: use sockets here to get stats for the activated question
-        if ($scope.openQuestion === question) {
-            $scope.openQuestion = null;
-            console.log('Decativated');
-        } else {
-            console.log('New active question');
-            $scope.openQuestion = question;
-        }
-        for(var n=0; n<4; n++) {
-            var data = [];
-            for(var i=0; i<12; i++) {
-                data.push(30*Math.random())
+    // Create a new question for the current quiz
+    // Todo: move to directive?
+    $scope.newQuestion = {
+        alternatives: [],
+        addAlternative: function () {
+            this.alternatives.push({name: "Content here", isCorrect: false });
+        },
+        removeAlternative: function (alt) {
+            var a = this.alternatives;
+            for(var i = a.length - 1; i >= 0; i--) {
+                if(a[i] === alt) {
+                    a.splice(i, 1);
+                    break;
+                };
             };
-            chartSeries[n].data = data;
-        };
-    };
-
-    var chartSeries = [
-        {
-            name: 'Mr. Black',
-            data: [4]
         },
-        {
-            name: 'Mr. Gray',
-            data: [6]
+        submit: function () {
+            socket.emit('admin:addQuestion', this);
         }
-    ];
-
-    $scope.chartConfig = {
-        options: {
-            chart: {
-                type: 'bar'
-            }
-        },
-        series: chartSeries,
-        title: {
-            text: 'Answers'
-        },
-        loading: false
     };
+
+    // Grouping of the actions in the action bar
+    $scope.actions = {
+        activateQuestion: function () {alert("Activate question: " + $scope.visibleQuestion.question)},
+        activateChat: function () {alert("Activate chat")},
+        viewResponses: function() {alert("View responses")},
+        addAdmin: function() {alert("Add admin")}
+    };
+
 });
