@@ -1,34 +1,24 @@
 var Quiz = require('./models/quiz'),
-    Question = require('./models/question');
+    Question = require('./models/question'),
+    passport = require('passport');
 /**
  * Socket.io configuration
  */
 module.exports = function (io) {
     var rooms = {main: []};
     io.sockets.on('connection', function(socket) {
-        // Connect to the default room. By default, sockets join the room "" on connection
+        socket.data = {};
+        passport.deserializeUser(socket.handshake.session.passport.user, function(err, user){if(err || !user.local)return; socket.data.user = user.local.username || user.local.email });
         var currentRoom = {name: "main"};
         socket.join(currentRoom.name);
         socket.emit('server:roomStatus',rooms[currentRoom.name]);
 
-        socket.on('join_room', function (room) {
-            // TODO: Verify that user is authenticated and has access to room
-            // Leave the current room, so that users only get messages from one room at the time
-            if (currentRoom) {
-                socket.leave(currentRoom.name);
-            };
-
-            // Join the new room
-            socket.join(room.name);
-            currentRoom = room;
-
-            console.log("CLIENT JOINED ROOM: " + currentRoom);
-
-            socket.emit('server:message', {title: "You have joined " + room.name, sender: "RoomManager"});
-        });
-
+        /***************************
+         * Chat
+         ***************************/
         socket.on('chatclient:message', function(data) {
             console.log('message received ' + data.title);
+            if(socket.data.user) data.sender = socket.data.user;
             socket.broadcast.to(currentRoom.name).emit('server:message', data);
             socket.emit('server:message', data); // Send message to sender
             rooms[currentRoom.name][data.topic].messages.push(data);
@@ -38,6 +28,7 @@ module.exports = function (io) {
             console.log('topic received ' + data.title);
             data.index = rooms[currentRoom.name].length;
             data.messages = [];
+            if(socket.data.user) data.sender = socket.data.user;
             socket.broadcast.to(currentRoom.name).emit('server:topic', data);
             rooms[currentRoom.name].push(data);
             // Send topic to sender
@@ -45,14 +36,17 @@ module.exports = function (io) {
             socket.emit('server:topic', data);
         });
 
+        /***************************
+         * Charts
+         ***************************/
         // TODO: remove this. Just for demo purposes
         socket.on('chartclient:series', function(data) {
             io.sockets.to(currentRoom.name).emit('chart:series', data);
         });
 
-        /**
-         * Admin interface and commands
-         */
+        /***************************
+         * Admin interface
+         ***************************/
         socket.on('admin:init', function () {
             Quiz.findOne( { permalink: "ogga" })
                 .exec(function (err, quiz) {
@@ -90,4 +84,3 @@ module.exports = function (io) {
 
     });
 };
-

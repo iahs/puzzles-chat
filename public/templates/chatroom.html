@@ -1,7 +1,7 @@
 <div>
     <div style="overflow:auto; height:247px;" id="chat-container">
         <ul class="list-group">
-            <li ng-repeat="topic in topics" class="list-group-item" ng-class="{active: topic.index==activeTopic}" ng-click="chooseTopic(topic.index)" id="topic-{{topic.index}}">{{topic.title}}
+            <li ng-repeat="topic in topics" class="list-group-item" ng-class="{active: topic.index==activeTopic}" ng-click="chooseTopic(topic.index)" id="topic-{{topic.index}}"><span>{{ topic.sender }}</span>:{{topic.title}}
                 <ul>
                     <li ng-repeat="message in topic.messages"><span>{{ message.sender }}</span>:
                     {{ message.title }}</li>
