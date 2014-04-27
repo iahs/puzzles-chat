@@ -6,6 +6,11 @@ var Quiz = require('./models/quiz'),
  */
 module.exports = function (io) {
     var rooms = {main: []};
+    Quiz.find({ }, function (err, docs) {
+        docs.forEach(function(doc){
+            rooms[doc.name]=doc.topics;
+        });
+    });
     io.sockets.on('connection', function(socket) {
         socket.data = {};
         passport.deserializeUser(socket.handshake.session.passport.user, function(err, user){if(err || !user.local)return; socket.data.user = user.local.username || user.local.email });
@@ -17,18 +22,18 @@ module.exports = function (io) {
          * Chat
          ***************************/
         socket.on('chatclient:message', function(data) {
-            console.log('message received ' + data.title);
             if(socket.data.user) data.sender = socket.data.user;
+            Quiz.findOneAndUpdate( {name: currentRoom.name, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
             socket.broadcast.to(currentRoom.name).emit('server:message', data);
             socket.emit('server:message', data); // Send message to sender
             rooms[currentRoom.name][data.topic].messages.push(data);
         });
 
         socket.on('chatclient:topic', function(data) {
-            console.log('topic received ' + data.title);
             data.index = rooms[currentRoom.name].length;
             data.messages = [];
             if(socket.data.user) data.sender = socket.data.user;
+            Quiz.findOneAndUpdate( {name: currentRoom.name }, {$push: {topics: data}}, function(err, result){ });
             socket.broadcast.to(currentRoom.name).emit('server:topic', data);
             rooms[currentRoom.name].push(data);
             // Send topic to sender

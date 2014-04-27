@@ -53,6 +53,7 @@ module.exports = function(app) {
         quiz.description = req.body.description;
         quiz.permalink = req.params.permalink;
         quiz.owner = req.user._id;
+        quiz.topics = [];
 
         quiz.save(function (err) {
             if (err)

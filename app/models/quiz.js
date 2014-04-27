@@ -1,5 +1,6 @@
 var mongoose = require('mongoose') || "ERROR", // hack for my IDE auto-completion
     Question = require('./question') || "ERROR",
+    Topic = require('./topic') || "ERROR",
     User = require('./user');
 
 var quizSchema = mongoose.Schema({
@@ -8,6 +9,7 @@ var quizSchema = mongoose.Schema({
     permalink: String,
     description: String,
     questions: [Question.schema],
+    topics: [Topic.schema],
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // TODO: allow for multiple admins
 
 });
