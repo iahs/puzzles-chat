@@ -18,7 +18,7 @@ block content
                     button.btn.btn-info.navbar-btn(ng-click="actions.activateChat()") Activate chat
                     button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
                     button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
-            h2  {{ quiz.name  }}
+            h2  {{ quiz.name  }} - {{ location }}
             p {{ visibleQuestion.question }}
             h4 Alternatives
             ul
@@ -38,20 +38,20 @@ block content
                         button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
                         h4#myModalLabel.modal-title Add question
                     .modal-body
-                        form(role="form")
+                        form(role="form", ng-submit="newQuestion.addAlternative()")
                             legend Question
                             .form-group
-                                input.form-control(placeholder="name", ng-model="newQuestion.name")
+                                input.form-control(placeholder="name", ng-model="newQuestion.name" required)
                             .form-group
-                                textarea.form-control(placeholder="question", ng-model="newQuestion.question")
+                                textarea.form-control(placeholder="question", ng-model="newQuestion.question" required)
                             legend Alternatives
                             .form-group(ng-repeat="alt in newQuestion.alternatives")
-                                input.form-control(ng-model="alt.name", placeholder="Enter value here")
+                                input.form-control(ng-model="alt.name", placeholder="Enter value here" required)
                                 label(class="checkbox")
                                     input(type="checkbox" ng-model="alt.isCorrect")
                                     | Is correct
                                 button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
-                            button.btn(ng-click="newQuestion.addAlternative()") Add alternative
+                            input.btn(type="submit", value="Add alternative")
 
                     .modal-footer
                         button.btn.btn-default(type='button', data-dismiss='modal') Close

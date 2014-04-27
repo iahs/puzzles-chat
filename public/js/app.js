@@ -1,6 +1,8 @@
 // Define the AngularJS application
 var app = angular.module('nodePuzzles', ['highcharts-ng']);
 
+
+
 // TODO: remove plotcontroller, only for demo purposes
 app.controller('PlotController', function ($scope, socket) {
 
@@ -55,7 +57,18 @@ app.controller('PlotController', function ($scope, socket) {
     };
 });
 
-app.controller('AdminPanelController', function ($scope, socket) {
+app.controller('AdminPanelController', function ($scope, $window, socket) {
+    // Get the room name from url
+    var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
+
+    // Connect to the corresponding room
+    socket.emit('join_room', { name: roomName, admin: true });
+
+    // Logging for debug
+    socket.on('server:info', function (info) {
+        console.log(info);
+    });
+
     // The array must NOT be replaced. The questionResult directive depends on it for plotting.
     $scope.answers = [];
 
@@ -74,11 +87,12 @@ app.controller('AdminPanelController', function ($scope, socket) {
 
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
+        // TODO: A bug here
         var questionUpdated = false;
         for (var i=0; i<$scope.quiz.questions.length; i++) {
             if ($scope.quiz.questions[i]._id === question._id) {
                 // Update the object
-                $scope.questions[i] = question;
+                $scope.quiz.questions[i] = question;
                 questionUpdated = true;
             }
         }
@@ -113,8 +127,8 @@ app.controller('AdminPanelController', function ($scope, socket) {
        $scope.answers[0].data[0] += 1;
     };
 
+
     // Create a new question for the current quiz
-    // Todo: move to directive with view?
     $scope.newQuestion = {
         alternatives: [],
         addAlternative: function () {

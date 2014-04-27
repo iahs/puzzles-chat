@@ -5,9 +5,11 @@ var mongoose = require('mongoose') || "ERROR", // hack for my IDE auto-completio
 var quizSchema = mongoose.Schema({
 
     name: String,
-    permalink: String,
+    permalink: { type: String, unique: true },
     description: String,
     questions: [Question.schema],
+    chatIsActive: Boolean,
+    activeQuestionId: { type: mongoose.Schema.Types.ObjectId },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // TODO: allow for multiple admins
 
 });
