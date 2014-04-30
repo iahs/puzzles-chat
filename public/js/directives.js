@@ -1,9 +1,10 @@
+var app = angular.module('nodePuzzles');
 /**
  * Simple directive to display a chatroom. For now, one global chatroom
  * that all clients connect to.
  * usage: add <chatroom></chatroom> in the html file
  */
-angular.module('nodePuzzles').directive('chatroom', function () {
+app.directive('chatroom', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/chatroom.html',
@@ -76,7 +77,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
  * Directive to display modal for adding new questions
  * Not finished yet
  */
-angular.module('nodePuzzles').directive('questionResults', function () {
+app.directive('questionResults', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/question_results.html',
@@ -112,7 +113,7 @@ angular.module('nodePuzzles').directive('questionResults', function () {
  * Directive to display modal for adding new questions
  * Not finished yet
  */
-angular.module('nodePuzzles').directive('addquestionmodal', function () {
+app.directive('addquestionmodal', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/addquestion_modal.html',
@@ -120,5 +121,21 @@ angular.module('nodePuzzles').directive('addquestionmodal', function () {
         controller: function ($scope) {
 
         }
+    };
+});
+
+/**
+ * Directive to render math for data that is manipulated by Angular
+ * This will not be rendered as math if just displayed normally.
+ */
+app.directive("mathjaxBind", function() {
+    return {
+        restrict: "A",
+        controller: ["$scope", "$element", "$attrs", function($scope, $element, $attrs) {
+            $scope.$watch($attrs.mathjaxBind, function(value) {
+                $element.text(value == undefined ? "" : value);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, $element[0]]);
+            });
+        }]
     };
 });

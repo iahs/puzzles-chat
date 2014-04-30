@@ -5,7 +5,8 @@ var Quiz = require('./models/quiz'),
 
 // Distinguish between chat rooms
 var admin_prefix    = 'admin:',
-    chat_prefix     = 'chat';
+    chat_prefix     = 'chat:',
+    client_prefix   = 'client:';
 
 // Store the entire log in memory, and only write to database
 // One instance shared across requests
@@ -21,6 +22,7 @@ Quiz.find({ }, function (err, quizzes) {
 
 module.exports = function (io) {
     io.sockets.on('connection', function(socket) {
+        // TODO: move to files and require them
 
         // Each connection is for a specific quiz identified by permalink
         // and a specific user
@@ -130,6 +132,9 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
+
+
+
                 io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
             });
 

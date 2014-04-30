@@ -1,8 +1,6 @@
 // Define the AngularJS application
 var app = angular.module('nodePuzzles', ['highcharts-ng']);
 
-
-
 // TODO: remove plotcontroller, only for demo purposes
 app.controller('PlotController', function ($scope, socket) {
 
@@ -116,6 +114,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
 
     socket.on('admin:questionActivated', function (question) {
         $scope.quiz.activeQuestionId = question._id;
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "body"]);
     });
 
     socket.on('admin:questionDeactivated', function () {
@@ -131,7 +130,32 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         }
     });
 
+    $scope.addAlternative = function (quiz, alternative) {
+        socket.emit('addAlternative', {
+            questionId: $scope.visibleQuestion._id,
+            alternative: alternative
+        });
+    };
 
+    socket.on('admin:newAlternative', function (data) {
+        // Find the right question, and add the alternative
+    });
+
+
+    $scope.newAlternative = {
+        name: 'New alternative',
+        isCorrect: false,
+        answers: [],
+        submit: function (question) {
+            if (!question)
+                return;
+            console.log(this);
+            socket.emit('admin:addAlternative', {
+                questionId: question._id,
+                alternative: this
+            });
+        }
+    };
 
     // Change the question in view
     $scope.viewQuestion = function(question) {
@@ -197,5 +221,4 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         viewResponses: function() {alert("View responses")},
         addAdmin: function() {alert("Add admin")}
     };
-
 });

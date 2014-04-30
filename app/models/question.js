@@ -14,6 +14,7 @@ var alternativeSchema = mongoose.Schema({
 });
 
 var questionSchema = mongoose.Schema({
+    name: String,
     question: String,
     alternatives: [alternativeSchema]
 });
