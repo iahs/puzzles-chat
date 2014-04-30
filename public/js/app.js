@@ -175,8 +175,11 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             };
         },
         submit: function () {
-            console.log(JSON.stringify(this));
             socket.emit('admin:addQuestion', this);
+            this.alternatives = [];
+            this.name = '';
+            this.question = '';
+            $('#addQuestion').modal('hide');
         }
     };
 
