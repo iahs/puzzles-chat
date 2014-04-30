@@ -7,19 +7,22 @@ angular.module('nodePuzzles').directive('chatroom', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/chatroom.html',
-        scope: {},
+        scope: { },
         controller: function ($scope, $element, $attrs, socket, $location, $anchorScroll, $timeout) {
+
+            // Tell the server that the chat is ready
+            // Otherwise, socket may send info before directive is ready
+            socket.emit('chat:init');
+
             $scope.newMessage = {sender: "Anonymous"};
             $scope.newTopic = {sender: "Anonymous", title:""};
 
             // Send a new message
             $scope.sendMessage = function() {
                 if ($scope.newMessage.title != "") {
+                    console.log('sending message')
                     $scope.newMessage.topic = $scope.activeTopic;
                     socket.emit('chatclient:message', $scope.newMessage);
-                    var newMsg = angular.copy($scope.newMessage);
-                    newMsg.class = "list-group-item-success";
-                    $scope.topics[$scope.activeTopic].messages.push(newMsg);
                     $scope.newMessage.title = "";
                 }
             };
@@ -27,17 +30,8 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             // Create a new topic
             $scope.createTopic = function() {
                 if ($scope.newTopic.title != "") {
-                    $scope.newTopic.index = $scope.nTopics++;
-                    $scope.newTopic.messages = [];
+                    console.log('sending topic')
                     socket.emit('chatclient:topic', $scope.newTopic);
-                    var newTopic = angular.copy($scope.newTopic);
-                    newTopic.class = "list-group-item-success";
-                    console.log($scope.topics)
-                    $scope.topics[newTopic.index]=newTopic;
-                    $scope.chooseTopic(newTopic.index);
-                    // Scroll to new topic
-                    $location.hash('topic-' + newTopic.index);
-                    $anchorScroll();
                     $scope.newTopic.title = "";
                 }
             };
@@ -48,7 +42,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             }
 
             // Receive a message
-            socket.on('server:message', function(message) {
+            socket.on('chat:message', function(message) {
                 console.log('received: ' + message)
                 // Save scroll position to avoid moving off active topic
                 var scroll = $('#chat-container').scrollTop() - $('#topic-' + message.topic).height();
@@ -59,14 +53,18 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             });
 
             // Receive a topic
-            socket.on('server:topic', function(topic) {
+            socket.on('chat:topic', function(topic) {
                 $scope.topics.push(topic);
-                $scope.nTopics++;
+                if(topic.isOwn) {
+                    $scope.chooseTopic(topic.index);
+                    // Scroll to new topic
+                    $location.hash('topic-' + topic.index);
+                    $anchorScroll();
+                }
             });
 
-            // Sync topic count
-            socket.on('server:roomStatus', function(data){
-                $scope.nTopics=data.length;
+            // Sync topics
+            socket.on('chat:roomStatus', function(data){
                 $scope.topics=data;
             });
 

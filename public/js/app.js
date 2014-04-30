@@ -83,6 +83,7 @@ app.controller('AdminPanelController', function ($scope, $window, socket) {
     socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;
         $scope.visibleQuestion = $scope.quiz.questions[0];
+        console.log('QUIZ' + JSON.stringify($scope.quiz));
     });
 
     // Easier to replace the question than targeting specific values, and only one function necessary

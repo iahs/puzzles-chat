@@ -52,6 +52,7 @@ module.exports = function(app) {
         quiz.description = req.body.description;
         quiz.permalink = req.params.permalink;
         quiz.owner = req.user._id;
+        quiz.topics = [];
 
         quiz.save(function (err) {
             if (err)
@@ -69,7 +70,6 @@ module.exports = function(app) {
         // Add authentication, and creator id
         Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
             if (quiz) {
-                quiz.name = "NAME";
                 quiz.save(function (err) {
                     if (err)
                         res.send(err);

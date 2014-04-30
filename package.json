@@ -1,21 +1,20 @@
 {
-    "name": "puzzlesVoter",
-    "description": "Real-time online voting and messaging",
-    "version": "0.0.1",
-    "private": true,
-    "dependencies": {
-        "express": "4.x",
-        "morgan": "*",
-        "jade": "*",
-        "mongoose": "*",
-        "passport": "*",
-        "passport-local": "*",
-        "bcrypt-nodejs": "*",
-        "body-parser": "*",
-        "connect-flash": "*",
-        "cookie-session": "*",
-        "express-session": "*",
-        "cookie-parser": "*",
-        "socket.io": "*"
-    }
+  "name": "puzzlesVoter",
+  "description": "Real-time online voting and messaging",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "4.x",
+    "morgan": "~1.0.0",
+    "jade": "~1.3.1",
+    "mongoose": "~3.8.8",
+    "passport": "~0.2.0",
+    "passport-local": "~1.0.0",
+    "body-parser": "~1.0.2",
+    "connect-flash": "~0.1.1",
+    "express-session": "~1.0.3",
+    "cookie-parser": "~1.0.1",
+    "socket.io": "~0.9.16",
+    "bcrypt-nodejs": "0.0.3"
+  }
 }
