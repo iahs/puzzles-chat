@@ -1,38 +1,106 @@
-/**
- * Socket.io configuration
- */
-module.exports = function (io) {
-    var rooms = {main: []};
-    io.sockets.on('connection', function(socket) {
-        // Connect to the default room. By default, sockets join the room "" on connection
-        var currentRoom = {name: "main"};
-        socket.join(currentRoom.name);
-        socket.emit('server:roomStatus',rooms[currentRoom.name]);
+var Quiz = require('./models/quiz'),
+    Question = require('./models/question'),
+    passport = require('passport') || 'ERROR',
+    mongoose = require('mongoose') || 'ERROR';
 
+// Distinguish between chat rooms
+var admin_prefix    = 'admin:',
+    chat_prefix     = 'chat';
+
+// Store the entire log in memory, and only write to database
+// One instance shared across requests
+var rooms = {};
+
+// TODO: will cause error if quiz is created after chat initialized
+Quiz.find({ }, function (err, quizzes) {
+    quizzes.forEach(function(quiz){
+        rooms[quiz.permalink]=quiz.topics;
+    });
+    console.log('Rooms initialized'+ JSON.stringify(rooms));
+});
+
+module.exports = function (io) {
+    io.sockets.on('connection', function(socket) {
+
+        // Each connection is for a specific quiz identified by permalink
+        // and a specific user
+        // (closure vars)
+        var permalink,
+            currentUser;
+
+        // Decrypt session cookie into the user variable
+        passport.deserializeUser(socket.handshake.session.passport.user, function(err, user){
+            if(err || !user.local)
+                return;
+            currentUser = user.local.username || user.local.email
+        });
+
+        /**
+         * Join a room for a specific quiz
+         * Will be added to chat and client,
+         * and admin if flag is set to true
+         * room = { name: 'string', admin: boolean }
+         */
         socket.on('join_room', function (room) {
             // TODO: Verify that user is authenticated and has access to room
-            // Leave the current room, so that users only get messages from one room at the time
-            if (currentRoom) {
-                socket.leave(currentRoom.name);
+            // Can only be connected to one permalink
+            if (permalink) {
+                socket.leave(permalink);
+                socket.leave(admin_prefix + permalink);
+                socket.leave(chat_prefix + permalink);
             };
 
-            // Join the new room
-            socket.join(room.name);
-            currentRoom = room;
+            // set the new permalink
+            permalink = room.name;
 
-            socket.emit('server:message', {title: "You have joined " + room.name, sender: "RoomManager"});
+            // Separate room for admin commands
+            if (room.admin === true) {
+                socket.join(admin_prefix+permalink);
+                // Send admin init data
+                quizQuery(permalink).exec(function (err, quiz) {
+                    socket.emit( 'admin:initdata', quiz );
+                });
+            };
+
+            // Join the room
+            socket.join(permalink);
+            // Join chats
+        });
+
+        socket.on('test:newanswer', function (id) {
+            io.sockets.in(admin_prefix+permalink).emit('admin:newanswer', id);
+        })
+
+
+        /***************************
+         * Chat
+         ***************************/
+        socket.on('chat:init', function () {
+            socket.join(chat_prefix+permalink);
+            socket.emit('chat:roomStatus',rooms[permalink]);
         });
 
         socket.on('chatclient:message', function(data) {
-            console.log('message received ' + data['title']);
-            socket.broadcast.to(currentRoom.name).emit('server:message', data);
-            rooms[currentRoom.name][data.topic].messages.push(data);
+            if(currentUser)
+                data.sender = currentUser;
+            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
+            socket.broadcast.to(chat_prefix+permalink).emit('chat:message', data);
+            socket.emit('chat:message', data); // Send message to sender
+            rooms[permalink][data.topic].messages.push(data);
         });
 
         socket.on('chatclient:topic', function(data) {
-            console.log('topic received ' + data['title']);
-            socket.broadcast.to(currentRoom.name).emit('server:topic', data);
-            rooms[currentRoom.name].push(data);
+            data.index = rooms[permalink].length; // This line causes a lot of errors. Should add some error handling
+            data.messages = [];
+            if(currentUser)
+                data.sender = currentUser;
+            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
+            socket.broadcast.to(chat_prefix+permalink).emit('chat:topic', data);
+            rooms[permalink].push(data);
+
+            // Send topic to sender
+            data.isOwn = true;
+            socket.emit('chat:topic', data);
         });
 
         socket.on('studentclient:question', function(data) {
@@ -45,14 +113,90 @@ module.exports = function (io) {
         //      socket.broadcast.to(currentRoom.name).emit('server:question',
         //      data)
         // }
-        socket.on('chartclient:series', function(data) {
-            io.sockets.to(currentRoom.name).emit('chart:series', data);
+        /***************************
+         * Charts
+         ***************************/
+         // TODO: remove this. Just for demo purposes
+         socket.on('chartclient:series', function(data) {
+            io.sockets.to(permalink).emit('chart:series', data);
+         });
+
+
+        socket.on('admin:setChatStatus', function (status) {
+            var isActive = !!status;
+
+            // Mongo update does not work
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.chatIsActive = isActive;
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:chatStatusUpdated', isActive);
+                // TODO: send some message to the chat directive
+            });
         });
 
-        socket.on('debug', function(data) {
-            console.log('debug: ' + data);
+        socket.on('admin:activateQuestion', function (question) {
+            console.log('Activating question', question);
+            // Mongo update does not work
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
+            });
+
+            // TODO: send some message to the chat directive
+        });
+
+        socket.on('admin:deactivateQuestion', function () {
+            // There can only be one active
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.activeQuestionId = null;
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:questionDeactivated');
+            });
+        });
+
+        socket.on('admin:addQuestion', function (question) {
+            if (!permalink)
+                return;
+
+            // TODO: format the question properly before pushing it into the database
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.questions.push(question);
+                quiz.save(function () {
+                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                });
+            });
+        });
+
+        socket.on('admin:removeQuestion', function () {
+
+        });
+
+        socket.on('admin:addAlternative', function (question, alternative) {
+            if (!permalink) return;
+            quizQuery(permalink).exec(function (err, quiz) {
+                var updatedQuestion;
+                for (var i=0; i<quiz.questions.length; i++) {
+                    var q = quiz.questions[i]
+                    if (q._id === question._id) {
+                        q.alternatives.push(alternative);
+                        updatedQuestion = q;
+                    };
+                };
+                quiz.save(function (err) {
+                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', updatedQuestion);
+                });
+            });
         });
 
     });
+};
+
+/**
+ * Query that get one quiz by current permalink
+ * @returns {*}
+ */
+function quizQuery(permalink) {
+    return Quiz.findOne({ permalink: permalink });
 };
 

@@ -1,0 +1,40 @@
+extends ../layout
+
+block content
+    #admin-dashboard(ng-controller="AdminDashboardController")
+        .col-md-9
+            h1 My Quizzes
+            p Here you can manage your quizzes and create new ones.
+            table.table
+                thead
+                    tr
+                        td Name
+                        td Permalink
+                        td Questions
+                        td Actions
+                tbody
+                    each quiz in quizzes
+                        tr
+                            td= quiz.name
+                            td= quiz.permalink
+                            td= quiz.questions.length
+                            td
+                                a.btn.btn-sm.btn-primary(href="/admin/quiz/#{quiz.permalink}") Manage
+            input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
+            a.btn.btn-primary(ng-href="/admin/quiz/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new quiz
+
+            h2 Recent
+            p List of recent quizzes the user has taken
+
+
+
+        .col-md-3.well
+            h3 Profile
+            dl(style="word-wrap: break-word;")
+                dt Id
+                dd= user.id
+                dt Email
+                dd= user.local.email
+                dt Password hash
+                dd= user.local.password
+            a Edit

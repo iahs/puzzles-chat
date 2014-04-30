@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+    #admin(ng-controller="AdminQuizController")
+        .col-lg-3
+            ul.list-group
+                h3.list-group-item-heading Questions
+                li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question===visibleQuestion}")
+                    a(ng-click="viewQuestion(question)") {{ question.question }}
+            button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
+        .col-lg-9
+            nav.navbar.navbar-default(role="navigation")
+                .navbar-header
+                    button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
+                    a(href="#" class="navbar-brand") Actions
+                #navbar-collapse-admin.collapse.navbar-collapse
+                    button.btn.btn-success.navbar-btn(ng-click="actions.activateQuestion()" ng-hide="quiz.activeQuestionId==visibleQuestion._id") Activate question
+                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.deactivateQuestion()" ng-show="quiz.activeQuestionId==visibleQuestion._id") Deactivate question
+                    button.btn.btn-info.navbar-btn(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Activate chat
+                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Deactivate chat
+                    button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
+                    button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
+            h2  {{ quiz.name  }} - {{ location }}
+            p {{ visibleQuestion.question }}
+            h4 Alternatives
+            ul
+                li(ng-repeat="alt in visibleQuestion.alternatives") {{alt.name}} ({{alt.answers.length}})
+            button.btn(ng-click="addAlternative()") Add alternative
+
+            question-results(answers="answers")
+            button.btn(ng-click="plusOne()") Click me
+            chatroom
+            responsebox
+
+
+        #addQuestion.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                        h4#myModalLabel.modal-title Add question
+                    .modal-body
+                        form(role="form", ng-submit="newQuestion.addAlternative()")
+                            legend Question
+                            .form-group
+                                input.form-control(placeholder="name", ng-model="newQuestion.name" required)
+                            .form-group
+                                textarea.form-control(placeholder="question", ng-model="newQuestion.question" required)
+                            legend Alternatives
+                            .form-group(ng-repeat="alt in newQuestion.alternatives")
+                                input.form-control(ng-model="alt.name", placeholder="Enter value here" required)
+                                label(class="checkbox")
+                                    input(type="checkbox" ng-model="alt.isCorrect")
+                                    | Is correct
+                                button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
+                            input.btn(type="submit", value="Add alternative")
+
+                    .modal-footer
+                        button.btn.btn-default(type='button', data-dismiss='modal') Close
+                        button.btn.btn-primary(ng-click="newQuestion.submit()") Add question

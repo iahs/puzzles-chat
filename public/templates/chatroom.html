@@ -1,9 +1,7 @@
-<h1>Chatroom directive</h1>
-
-<div style="width:400px; float:right;">
+<div>
     <div style="overflow:auto; height:247px;" id="chat-container">
         <ul class="list-group">
-            <li ng-repeat="topic in topics" class="list-group-item" ng-class="{active: topic.index==activeTopic}" ng-click="chooseTopic(topic.index)" id="topic-{{topic.index}}">{{topic.title}}
+            <li ng-repeat="topic in topics" class="list-group-item" ng-class="{active: topic.index==activeTopic}" ng-click="chooseTopic(topic.index)" id="topic-{{topic.index}}"><span>{{ topic.sender }}</span>:{{topic.title}}
                 <ul>
                     <li ng-repeat="message in topic.messages"><span>{{ message.sender }}</span>:
                     {{ message.title }}</li>
@@ -18,8 +16,6 @@
             <button class="btn btn-primary">Post response</button>
         </div>
     </form>
-
-    <br />
 
     <form role="form" ng-submit="createTopic()">
         <div class="form-group">

@@ -1,9 +1,12 @@
 extends layout
 
 block content
+    h1  Chat is only defined for quizzes for now
+    p Will not work here any more
     chatroom
     quiz
     responsebox
     .clearfix(ng-controller='PlotController')
         highchart#demo-chart(config='chartConfig')
         button.btn.btn-primary(ng-repeat='type in chartTypes', ng-click='addSeries(type.id)') {{ type.title }}
+    responsebox

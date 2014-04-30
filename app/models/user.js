@@ -1,14 +1,12 @@
-// app/models/user.js
-// load the things we need
-var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
+var mongoose = require('mongoose') || "Error",
+    bcrypt   = require('bcrypt-nodejs');
 
-// define the schema for our user model
+// Define database schema
 var userSchema = mongoose.Schema({
-
     local            : {
+        username     : String, //TODO: FIX
         email        : String,
-        password     : String,
+        password     : String
     },
     facebook         : {
         id           : String,
@@ -31,16 +29,14 @@ var userSchema = mongoose.Schema({
 
 });
 
-// methods ======================
-// generating a hash
+// Hash function for passwords
 userSchema.methods.generateHash = function(password) {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
 
-// checking if password is valid
-userSchema.methods.validPassword = function(password) {
+// Check if a password is valid
+userSchema.methods.isValidPassword = function(password) {
     return bcrypt.compareSync(password, this.local.password);
 };
 
-// create the model for users and expose it to our app
 module.exports = mongoose.model('User', userSchema);

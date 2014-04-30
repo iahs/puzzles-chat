@@ -1,5 +1,5 @@
 br
-nav.navbar.navbar-inverse(role='navigation')
+nav.navbar.navbar-inverse(role='navigation', ng-controller="NavbarController")
     .navbar-header
         button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbar-collapse-01')
             span.sr-only Toggle navigation
@@ -9,11 +9,11 @@ nav.navbar.navbar-inverse(role='navigation')
             li.active
                 a(href='#fakelink') My rooms
             li
-                a(href='/profile') Profile
-        form.navbar-form.navbar-right(action='#', role='search')
+                a(href='/admin') Admin
+        form.navbar-form.navbar-right
             .form-group
                 .input-group
-                    input#navbarInput-01.form-control(type='search', placeholder='Go to room')
+                    input#navbarInput-01.form-control(ng-model="permalink", placeholder='Go to quiz')
                     span.input-group-btn
-                        button.btn(type='submit')
+                        a.btn(ng-href="/quiz/{{permalink}}", ng-disabled="!permalink")
                             span.fui-search
