@@ -56,12 +56,20 @@ module.exports = function (io) {
             // Separate room for admin commands
             if (room.admin === true) {
                 socket.join(admin_prefix+permalink);
+                // Send admin init data
+                quizQuery(permalink).exec(function (err, quiz) {
+                    socket.emit( 'admin:initdata', quiz );
+                });
             };
 
             // Join the room
             socket.join(permalink);
             // Join chats
         });
+
+        socket.on('test:newanswer', function (id) {
+            io.sockets.in(admin_prefix+permalink).emit('admin:newanswer', id);
+        })
 
 
         /***************************
@@ -103,16 +111,6 @@ module.exports = function (io) {
             io.sockets.to(permalink).emit('chart:series', data);
          });
 
-
-        /***************************
-         * Admin interface
-         ***************************/
-        socket.on('admin:init', function () {
-            if (!permalink) return;
-            quizQuery(permalink).exec(function (err, quiz) {
-                socket.emit( 'admin:initdata', quiz );
-            });
-        });
 
         socket.on('admin:setChatStatus', function (status) {
             var isActive = !!status;

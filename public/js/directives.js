@@ -62,7 +62,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             });
 
             // Sync topics
-
             socket.on('chat:roomStatus', function(data){
                 $scope.topics=data;
             });
@@ -85,7 +84,6 @@ angular.module('nodePuzzles').directive('questionResults', function () {
             answers: '='
         },
         controller: function ($scope) {
-
             $scope.chartConfig = {
                 options: {
                     chart: {
@@ -104,7 +102,6 @@ angular.module('nodePuzzles').directive('questionResults', function () {
                 },
                 loading: false
             };
-
         }
     };
 });

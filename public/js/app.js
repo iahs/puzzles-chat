@@ -58,7 +58,7 @@ app.controller('PlotController', function ($scope, socket) {
 });
 
 app.controller('NavbarController', function ($scope) {
-
+    // Navbar on top of page
 });
 
 app.controller('AdminDashboardController', function ($scope) {
@@ -69,7 +69,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Get the room name from url
     var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
 
-    // Connect to the corresponding room
+    // Connect to the corresponding room. By specifying admin, will get admin data back
     socket.emit('join_room', { name: roomName, admin: true });
 
     // Logging for debug
@@ -78,7 +78,12 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     });
 
     // The array must NOT be replaced. The questionResult directive depends on it for plotting.
-    $scope.answers = [];
+    $scope.answers = [
+        { data: [4], name: "Alt. 1", id: 1 },
+        { data: [3], name: "Alt. 2", id: 2 },
+        { data: [6], name: "Alt. 3", id: 3 },
+        { data: [1], name: "Alt. 4", id: 4 }
+    ];
 
     // A reference to the question the user is currently viewing
     $scope.visibleQuestion = {};
@@ -86,17 +91,13 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // A reference to the quiz object of the page
     $scope.quiz = {};
 
-    // Get current quiz from the server
-    socket.emit('admin:init');
     socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;
-        $scope.visibleQuestion = $scope.quiz.questions[0];
-        console.log('QUIZ' + JSON.stringify($scope.quiz));
+        $scope.visibleQuestion = $scope.quiz.questions[0] || {};
     });
 
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
-        // TODO: A bug here
         var questionUpdated = false;
         for (var i=0; i<$scope.quiz.questions.length; i++) {
             if ($scope.quiz.questions[i]._id === question._id) {
@@ -121,6 +122,15 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.quiz.activeQuestionId = '';
     });
 
+    socket.on('admin:newanswer', function (alternativeId) {
+        for(var i=0; i<$scope.answers.length; i++) {
+            if ($scope.answers[i].id === alternativeId) {
+                console.log($scope.answers[i]);
+                $scope.answers[i].data[0] += 1;
+            }
+        }
+    });
+
 
 
     // Change the question in view
@@ -129,10 +139,10 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
 
         // TODO: change this into using the question data when we get data for questions
         var newAnswers = [
-            { data: [5], name: "Alt. 1" },
-            { data: [6], name: "Alt. 2" },
-            { data: [12], name: "Alt. 3" },
-            { data: [1], name: "Alt. 4" }
+            { data: [5], name: "Alt. 1", id: 1 },
+            { data: [6], name: "Alt. 2", id: 2 },
+            { data: [12], name: "Alt. 3", id: 3 },
+            { data: [1], name: "Alt. 4", id: 4 }
         ];
         // Remove the existing data
         while ($scope.answers.length > 0 )
@@ -141,12 +151,11 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         for (var i=0; i<newAnswers.length; i++) {
             $scope.answers.push(newAnswers[i]);
         };
-        console.log($scope.answers);
     };
 
     // TODO: remove this when real functionality for updating graph is in place
     $scope.plusOne = function () {
-       $scope.answers[0].data[0] += 1;
+        socket.emit('test:newanswer', $scope.answers[0].id)
     };
 
 
