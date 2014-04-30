@@ -35,6 +35,16 @@ module.exports = function (io) {
             rooms[currentRoom.name].push(data);
         });
 
+        socket.on('studentclient:question', function(data) {
+            socket.broadcast.to(currentRoom.name).emit('server:question' data);
+
+        }
+    
+        // XXX: add adminclient:question here
+        // socket.on('adminclient:question', function (data) {
+        //      socket.broadcast.to(currentRoom.name).emit('server:question',
+        //      data)
+        // }
         socket.on('chartclient:series', function(data) {
             io.sockets.to(currentRoom.name).emit('chart:series', data);
         });
@@ -42,6 +52,7 @@ module.exports = function (io) {
         socket.on('debug', function(data) {
             console.log('debug: ' + data);
         });
+
     });
 };
 
