@@ -9,7 +9,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
         templateUrl: '/templates/chatroom.html',
         scope: { },
         controller: function ($scope, $element, $attrs, socket, $location, $anchorScroll, $timeout) {
-
             // Tell the server that the chat is ready
             // Otherwise, socket may send info before directive is ready
             socket.emit('chat:init');

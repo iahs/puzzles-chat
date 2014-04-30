@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-    #admin(ng-controller="AdminPanelController")
+    #admin(ng-controller="AdminQuizController")
         .col-lg-3
             ul.list-group
                 h3.list-group-item-heading Questions
@@ -14,8 +14,10 @@ block content
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                     a(href="#" class="navbar-brand") Actions
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-success.navbar-btn(ng-click="actions.activateQuestion()") Activate question
-                    button.btn.btn-info.navbar-btn(ng-click="actions.activateChat()") Activate chat
+                    button.btn.btn-success.navbar-btn(ng-click="actions.activateQuestion()" ng-hide="quiz.activeQuestionId==visibleQuestion._id") Activate question
+                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.deactivateQuestion()" ng-show="quiz.activeQuestionId==visibleQuestion._id") Deactivate question
+                    button.btn.btn-info.navbar-btn(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Activate chat
+                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Deactivate chat
                     button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
                     button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
             h2  {{ quiz.name  }} - {{ location }}

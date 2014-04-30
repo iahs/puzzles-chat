@@ -1,6 +1,7 @@
 var Quiz = require('./models/quiz'),
     Question = require('./models/question'),
-    passport = require('passport') || 'ERROR';
+    passport = require('passport') || 'ERROR',
+    mongoose = require('mongoose') || 'ERROR';
 
 // Distinguish between chat rooms
 var admin_prefix    = 'admin:',
@@ -74,7 +75,8 @@ module.exports = function (io) {
         socket.on('chatclient:message', function(data) {
             if(currentUser)
                 data.sender = currentUser;
-            socket.in(chat_prefix+permalink).emit('chat:message', data);
+            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
+            io.sockets.in(chat_prefix+permalink).emit('chat:message', data);
             socket.emit('chat:message', data); // Send message to sender
             rooms[permalink][data.topic].messages.push(data);
         });
@@ -84,6 +86,7 @@ module.exports = function (io) {
             data.messages = [];
             if(currentUser)
                 data.sender = currentUser;
+            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
             socket.broadcast.to(chat_prefix+permalink).emit('chat:topic', data);
             rooms[permalink].push(data);
 
@@ -111,10 +114,41 @@ module.exports = function (io) {
             });
         });
 
-        socket.on('admin:activateQuestion', function () {
-            if (!permalink) return;
-           // Activate the requested question, dectivate the current.
+        socket.on('admin:setChatStatus', function (status) {
+            var isActive = !!status;
+
+            // Mongo update does not work
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.chatIsActive = isActive;
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:chatStatusUpdated', isActive);
+                // TODO: send some message to the chat directive
+            });
         });
+
+        socket.on('admin:activateQuestion', function (question) {
+            console.log('Activating question', question);
+            // Mongo update does not work
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
+            });
+
+            // TODO: send some message to the chat directive
+        });
+
+        socket.on('admin:deactivateQuestion', function () {
+            // There can only be one active
+            quizQuery(permalink).exec(function (err, quiz) {
+                quiz.activeQuestionId = null;
+                quiz.save();
+                io.sockets.in(admin_prefix+permalink).emit('admin:questionDeactivated');
+            });
+        });
+
+
+
 
         socket.on('admin:addQuestion', function (question) {
             if (!permalink)
@@ -124,17 +158,13 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.questions.push(question);
                 quiz.save(function () {
-                    socket.in(admin_prefix+permalink).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
                 });
             });
         });
 
         socket.on('admin:removeQuestion', function () {
 
-        });
-
-        socket.on('admin:setChatStatus', function (status) {
-            // Activate or deactivate stat
         });
 
         socket.on('admin:addAlternative', function (question, alternative) {
@@ -149,7 +179,7 @@ module.exports = function (io) {
                     };
                 };
                 quiz.save(function (err) {
-                    socket.in(admin_prefix+permalink).emit('admin:questionChange', updatedQuestion);
+                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', updatedQuestion);
                 });
             });
         });
@@ -164,3 +194,4 @@ module.exports = function (io) {
 function quizQuery(permalink) {
     return Quiz.findOne({ permalink: permalink });
 };
+

@@ -45,11 +45,7 @@ app.use(flash());
 
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/app/views');
-app.get('/', function (req, res) {
-    res.render('index');
-});
 app.use(express.static(__dirname + '/public'));
-
 
 /**************************
  * Passport configuration
@@ -83,11 +79,12 @@ io.set('authorization', function (data, callback) {
     // Express cookieParser(req, res, next) is used initialy to parse data in "req.headers.cookie".
     // Here our cookies are stored in "data.headers.cookie", so we just pass "data" to the first argument of function
     cookieParser(data, {}, function(parseErr) {
-        if(parseErr) { return callback('Error parsing cookies.', false); }
+        if(parseErr) {
+            return callback('Error parsing cookies.', false);
+        }
 
         // Get the SID cookie
         var sidCookie = (data.secureCookies && data.secureCookies[EXPRESS_SID_KEY]) ||
-
             (data.signedCookies && data.signedCookies[EXPRESS_SID_KEY]) ||
             (data.cookies && data.cookies[EXPRESS_SID_KEY]);
 
@@ -96,12 +93,11 @@ io.set('authorization', function (data, callback) {
         sessionStore.load(sidCookie, function(err, session) {
             // And last, we check if the used has a valid session and if he is logged in
             if (err || !session || session.isLogged !== true) {
-                callback('Not logged in.', false);
+                callback('Not logged in. TODO: handle this better', false);
             } else {
                 // If you want, you can attach the session to the handshake data, so you can use it again later
                 // You can access it later with "socket.handshake.session"
                 data.session = session;
-
                 callback(null, true);
             }
         });

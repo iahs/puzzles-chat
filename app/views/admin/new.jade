@@ -7,8 +7,8 @@ block content
     form(role="form", method="POST", action="/admin/quiz/#{permalink}")
         .form-group
             label(for="title") Title
-            input.form-control(name="title", id="title")
+            input.form-control(name="title", id="title", value="#{permalink}" required)
         .form-group
             label(for="description") Description
-            textarea.form-control(name="description", id="description")
+            textarea.form-control(name="description", id="description", placeholder="Enter a description of the quiz here" required)
         input.btn.btn-primary(type="submit", value="Create")

@@ -57,7 +57,15 @@ app.controller('PlotController', function ($scope, socket) {
     };
 });
 
-app.controller('AdminPanelController', function ($scope, $window, socket) {
+app.controller('NavbarController', function ($scope) {
+
+});
+
+app.controller('AdminDashboardController', function ($scope) {
+    // Where the users manage their quizzes and profile
+});
+
+app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Get the room name from url
     var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
 
@@ -100,6 +108,19 @@ app.controller('AdminPanelController', function ($scope, $window, socket) {
         if (!questionUpdated)
             $scope.quiz.questions.push(question);
     });
+
+    socket.on('admin:chatStatusUpdated', function (status) {
+        $scope.quiz.chatIsActive = status;
+    });
+
+    socket.on('admin:questionActivated', function (question) {
+        $scope.quiz.activeQuestionId = question._id;
+    });
+
+    socket.on('admin:questionDeactivated', function () {
+        $scope.quiz.activeQuestionId = '';
+    });
+
 
 
     // Change the question in view
@@ -152,8 +173,15 @@ app.controller('AdminPanelController', function ($scope, $window, socket) {
 
     // Grouping of the actions in the action bar
     $scope.actions = {
-        activateQuestion: function () {alert("Activate question: " + $scope.visibleQuestion.question)},
-        activateChat: function () {alert("Activate chat")},
+        setChatStatus: function (status) {
+            socket.emit('admin:setChatStatus', !!status)
+        },
+        activateQuestion: function () {
+            socket.emit('admin:activateQuestion', $scope.visibleQuestion)
+        },
+        deactivateQuestion: function () {
+            socket.emit('admin:deactivateQuestion')
+        },
         viewResponses: function() {alert("View responses")},
         addAdmin: function() {alert("Add admin")}
     };
