@@ -30,7 +30,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             // Create a new topic
             $scope.createTopic = function() {
                 if ($scope.newTopic.title != "") {
-                    console.log('sending topic')
                     socket.emit('chatclient:topic', $scope.newTopic);
                     $scope.newTopic.title = "";
                 }
@@ -64,6 +63,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             });
 
             // Sync topics
+
             socket.on('chat:roomStatus', function(data){
                 $scope.topics=data;
             });

@@ -87,8 +87,10 @@ io.set('authorization', function (data, callback) {
 
         // Get the SID cookie
         var sidCookie = (data.secureCookies && data.secureCookies[EXPRESS_SID_KEY]) ||
+
             (data.signedCookies && data.signedCookies[EXPRESS_SID_KEY]) ||
             (data.cookies && data.cookies[EXPRESS_SID_KEY]);
+
 
         // Then we just need to load the session from the Express Session Store
         sessionStore.load(sidCookie, function(err, session) {

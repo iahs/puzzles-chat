@@ -100,6 +100,7 @@ module.exports = function (io) {
             io.sockets.to(permalink).emit('chart:series', data);
          });
 
+
         /***************************
          * Admin interface
          ***************************/
@@ -152,6 +153,7 @@ module.exports = function (io) {
                 });
             });
         });
+
     });
 };
 
