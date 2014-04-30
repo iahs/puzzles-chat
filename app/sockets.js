@@ -84,7 +84,7 @@ module.exports = function (io) {
             if(currentUser)
                 data.sender = currentUser;
             Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
-            io.sockets.in(chat_prefix+permalink).emit('chat:message', data);
+            socket.broadcast.to(chat_prefix+permalink).emit('chat:message', data);
             socket.emit('chat:message', data); // Send message to sender
             rooms[permalink][data.topic].messages.push(data);
         });
