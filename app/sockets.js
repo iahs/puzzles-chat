@@ -27,15 +27,9 @@ module.exports = function (io) {
         // Each connection is for a specific quiz identified by permalink
         // and a specific user
         // (closure vars)
-        var permalink,
-            currentUser;
+        var permalink;
 
-        // Decrypt session cookie into the user variable
-        passport.deserializeUser(socket.handshake.session.passport.user, function(err, user){
-            if(err || !user.local)
-                return;
-            currentUser = user.local.username || user.local.email
-        });
+        var currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email
 
         /**
          * Join a room for a specific quiz
