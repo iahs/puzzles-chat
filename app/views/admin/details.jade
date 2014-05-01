@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+    #admin-details(ng-controller="AdminDetailsController")
+        h1 {{ quiz.name }}
+        .table-responsive
+            table.table
+                thead
+                    tr
+                        th(ng-click="setSortBy('name')") Name
+                        th Question
+                        th Answers
+                tbody
+                    tr(ng-repeat="question in quiz.questions | orderBy:sortBy:reverseSort   ")
+                        td {{ question.name }}
+                        td {{ question.question }}
+
+

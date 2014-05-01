@@ -222,3 +222,26 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         addAdmin: function() {alert("Add admin")}
     };
 });
+
+app.controller('AdminDetailsController', function ($scope, socket) {
+    socket.emit('join_room', { name: 'ogga', admin: true }); // Todo: use actual permalink
+
+    socket.on('admin:initdata', function (quiz) {
+        $scope.quiz = quiz;
+    });
+
+    // table sorting
+    $scope.reverseSort = true;
+    $scope.setSortBy = function (string) {
+        if ($scope.sortBy == string) {
+            $scope.reverseSort = !$scope.reverseSort;
+        } else {
+            $scope.sortBy = string;
+        }
+    }
+
+
+
+
+
+})

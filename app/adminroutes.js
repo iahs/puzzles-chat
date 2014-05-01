@@ -25,6 +25,23 @@ module.exports = function(app) {
            };
         });
     });
+    app.get('/admin/quiz/:permalink/details', function (req, res) {
+        Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
+            if (quiz) {
+                quiz.questions.forEach(function (q) {
+                    q.answerCount = 0;
+                    q.alternatives.forEach(function (a) {
+                        q.answerCount += a.answers.length;
+                    });
+                });
+
+                // TODO: add authentication here to check that user is admin for quiz
+                res.render('admin/details', {quiz: quiz});
+            } else {
+                res.send("Not found");
+            };
+        });
+    });
 
     /**
      * Create a new quiz
@@ -45,6 +62,10 @@ module.exports = function(app) {
             res.redirect('/admin/quiz/' + req.params.permalink);
         });
     });
+
+
+
+
 
     // Editing and updating is done over sockets
 };
