@@ -75,6 +75,9 @@ module.exports = function (io) {
         socket.on('chatclient:init', function () {
             socket.join(roomName(permalink, 'chat'));
             socket.emit('chatserver:roomStatus',rooms[permalink]);
+            quizQuery(permalink).exec(function (err, quiz) {
+                socket.emit('admin:chatStatusUpdated', quiz.chatIsActive);
+            });
         });
 
         socket.on('chatclient:message', function(data) {
@@ -112,7 +115,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.chatIsActive = isActive;
                 quiz.save();
-                io.sockets.in(roomName(permalink, 'admin')).emit('admin:chatStatusUpdated', isActive);
+                io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
                 // TODO: send some message to the chat directive
             });
         });

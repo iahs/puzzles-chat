@@ -13,11 +13,11 @@
     <form role="form" ng-submit="sendMessage()">
         <div class="form-group">
             <input ng-model="newMessage.title" type="text" placeholder="Message..." class="form-control" ng-disabled="activeTopic === undefined" />
-            <button class="btn btn-primary">Post response</button>
+            <button class="btn btn-primary" ng-disabled="activeTopic === undefined">Post response</button>
         </div>
     </form>
 
-    <form role="form" ng-submit="createTopic()">
+    <form role="form" ng-submit="createTopic()" ng-show="chatEnabled">
         <div class="form-group">
             <input ng-model="newTopic.title" type="text" placeholder="New topic..." class="form-control"/>
             <button class="btn btn-primary">Ask new question</button>

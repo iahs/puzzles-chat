@@ -55,6 +55,7 @@ module.exports = function(app) {
         quiz.permalink = req.params.permalink;
         quiz.owner = req.user._id;
         quiz.topics = [];
+        quiz.chatIsActive = 1;
 
         quiz.save(function (err) {
             if (err)

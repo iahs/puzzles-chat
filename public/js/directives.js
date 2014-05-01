@@ -66,6 +66,11 @@ app.directive('chatroom', function () {
                 $scope.topics=data;
             });
 
+            // Chat enable/disable
+            socket.on('admin:chatStatusUpdated', function(status){
+                $scope.chatEnabled = status;
+            });
+
         }
     }
 });
