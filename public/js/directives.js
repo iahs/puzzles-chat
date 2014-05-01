@@ -71,6 +71,33 @@ app.directive('chatroom', function () {
     }
 });
 
+angular.module('nodePuzzles').directive('student-box', function () {
+    return {
+        restrict: 'E',
+        templateUrl: 'templates/student-box.html',
+        scope: {},
+        controller: function ($scope, $element, $attrs, socket, $location) {
+
+            // Send answer to current question
+            $scope.sendAnswer = function() {
+            
+                // Should send response to answer as a response
+                socket.emit('studentclient:question', $scope.question);
+                
+            };
+
+            // Receive a question (just override previous one)
+            socket.on('server:question', function(question) {
+                console.log('received: ' + question)
+                
+                // XXX: Should we auto-submit previous answer when new
+                // question is assigned?
+                $scope.question = question;
+            });
+
+        }
+    }
+});
 
 
 /**

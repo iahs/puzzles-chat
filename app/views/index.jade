@@ -6,4 +6,9 @@ block content
     h2 But we have math
     p $$\int\limits_{i=1}^{10} x dx$$
     chatroom
+    quiz
+    responsebox
+    .clearfix(ng-controller='PlotController')
+        highchart#demo-chart(config='chartConfig')
+        button.btn.btn-primary(ng-repeat='type in chartTypes', ng-click='addSeries(type.id)') {{ type.title }}
     responsebox

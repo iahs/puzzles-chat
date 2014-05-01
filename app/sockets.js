@@ -105,6 +105,16 @@ module.exports = function (io) {
             socket.emit('chat:topic', data);
         });
 
+        socket.on('studentclient:question', function(data) {
+            socket.broadcast.to(currentRoom.name).emit('server:question' data);
+
+        }
+    
+        // XXX: add adminclient:question here
+        // socket.on('adminclient:question', function (data) {
+        //      socket.broadcast.to(currentRoom.name).emit('server:question',
+        //      data)
+        // }
         /***************************
          * Charts
          ***************************/
@@ -149,9 +159,6 @@ module.exports = function (io) {
                 io.sockets.in(admin_prefix+permalink).emit('admin:questionDeactivated');
             });
         });
-
-
-
 
         socket.on('admin:addQuestion', function (question) {
             if (!permalink)
