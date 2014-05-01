@@ -106,21 +106,15 @@ module.exports = function (io) {
         });
 
         socket.on('studentclient:question', function(data) {
-            socket.broadcast.to(currentRoom.name).emit('server:question' data);
+            socket.broadcast.to(client_prefix+permalink).emit('server:question', data);
+        });
 
-        }
-    
-        // XXX: add adminclient:question here
-        // socket.on('adminclient:question', function (data) {
-        //      socket.broadcast.to(currentRoom.name).emit('server:question',
-        //      data)
-        // }
         /***************************
          * Charts
          ***************************/
          // TODO: remove this. Just for demo purposes
          socket.on('chartclient:series', function(data) {
-            io.sockets.to(permalink).emit('chart:series', data);
+            socket.broadcast.to(client_prefix+permalink).emit('chart:series', data);
          });
 
 
