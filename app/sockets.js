@@ -16,30 +16,22 @@ var roomName = function (permalink, type) {
         default:
             throw new Error('Unknown room type');
     }
-}
+};
 
 
 // Store the entire log in memory, and only write to database
 // One instance shared across requests
 var rooms = {};
-
 Quiz.find({ }, function (err, quizzes) {
     quizzes.forEach(function(quiz){
         rooms[quiz.permalink]=quiz.topics;
     });
-    console.log('Rooms initialized'+ JSON.stringify(rooms));
 });
 
 module.exports = function (io) {
     io.sockets.on('connection', function(socket) {
-        // TODO: move to files and require them
-
-        // Each connection is for a specific quiz identified by permalink
-        // and a specific user
-        // (closure vars)
-        var permalink;
-
-        var currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email
+        var permalink,
+        currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email;
 
         /**
          * Join a room for a specific quiz
