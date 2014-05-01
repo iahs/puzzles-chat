@@ -69,10 +69,9 @@ require('./app/adminroutes.js')(app);
 /***************************
  * Socket authentication
  ***************************/
-
  io.set('authorization', passportSocketIo.authorize({
-  cookieParser: cookieParser,
-  key:         EXPRESS_SID_KEY,
-  secret:      COOKIE_SECRET,
-  store:       mongoStore
+    cookieParser: cookieParser,
+    key:         EXPRESS_SID_KEY,
+    secret:      COOKIE_SECRET,
+    store:       mongoStore
 }));

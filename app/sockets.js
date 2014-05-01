@@ -72,18 +72,17 @@ module.exports = function (io) {
         /***************************
          * Chat
          ***************************/
-        socket.on('chat:init', function () {
+        socket.on('chatclient:init', function () {
             socket.join(roomName(permalink, 'chat'));
-            socket.emit('chat:roomStatus',rooms[permalink]);
+            socket.emit('chatserver:roomStatus',rooms[permalink]);
         });
 
         socket.on('chatclient:message', function(data) {
             if(currentUser)
                 data.sender = currentUser;
-            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
-            socket.broadcast.to(roomName(permalink, 'chat')).emit('chat:message', data);
-            socket.emit('chat:message', data); // Send message to sender
             rooms[permalink][data.topic].messages.push(data);
+            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
+            io.sockets.in(roomName(permalink, 'chat')).emit('chatserver:message', data);
         });
 
         socket.on('chatclient:topic', function(data) {
@@ -91,13 +90,10 @@ module.exports = function (io) {
             data.messages = [];
             if(currentUser)
                 data.sender = currentUser;
-            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
-            socket.broadcast.to(roomName(permalink, 'chat')).emit('chat:topic', data);
             rooms[permalink].push(data);
-
-            // Send topic to sender
-            data.isOwn = true;
-            socket.emit('chat:topic', data);
+            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
+            io.sockets.in(roomName(permalink, 'chat')).emit('chatserver:topic', data);
+            socket.emit('chatserver:selectTopic', data.index); // Make sender select new topic
         });
 
         /***************************
