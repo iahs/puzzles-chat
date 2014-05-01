@@ -78,7 +78,7 @@ module.exports = function (io) {
         });
 
         socket.on('test:newanswer', function (id) {
-            socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:newanswer', id);
+            io.sockets.in(roomName(permalink, 'admin')).emit('admin:newanswer', id);
         })
 
         /***************************
@@ -132,7 +132,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.chatIsActive = isActive;
                 quiz.save();
-                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:chatStatusUpdated', isActive);
+                io.sockets.in(roomName(permalink, 'admin')).emit('admin:chatStatusUpdated', isActive);
                 // TODO: send some message to the chat directive
             });
         });
@@ -143,7 +143,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
-                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
+                io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
             });
 
             // TODO: send some message to the chat directive
@@ -154,7 +154,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = null;
                 quiz.save();
-                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
+                io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
             });
         });
 
@@ -166,7 +166,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.questions.push(question);
                 quiz.save(function () {
-                    socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
                 });
             });
         });
@@ -187,7 +187,7 @@ module.exports = function (io) {
                     };
                 };
                 quiz.save(function (err) {
-                    socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
+                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
                 });
             });
         });
