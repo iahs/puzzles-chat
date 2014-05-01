@@ -4,15 +4,25 @@ var Quiz = require('./models/quiz'),
     mongoose = require('mongoose') || 'ERROR';
 
 // Distinguish between chat rooms
-var admin_prefix    = 'admin:',
-    chat_prefix     = 'chat:',
-    client_prefix   = 'client:';
+var roomName = function (permalink, type) {
+    var separator = ':';
+    switch (type) {
+        case 'chat':
+            return 'chat' + separator + permalink;
+        case 'admin':
+            return 'admin' + separator + permalink;
+        case 'client':
+            return 'client' + separator + permalink;
+        default:
+            throw new Error('Unknown room type');
+    }
+}
+
 
 // Store the entire log in memory, and only write to database
 // One instance shared across requests
 var rooms = {};
 
-// TODO: will cause error if quiz is created after chat initialized
 Quiz.find({ }, function (err, quizzes) {
     quizzes.forEach(function(quiz){
         rooms[quiz.permalink]=quiz.topics;
@@ -41,17 +51,22 @@ module.exports = function (io) {
             // TODO: Verify that user is authenticated and has access to room
             // Can only be connected to one permalink
             if (permalink) {
-                socket.leave(permalink);
-                socket.leave(admin_prefix + permalink);
-                socket.leave(chat_prefix + permalink);
+                socket.leave(roomName(permalink, 'chat'));
+                socket.leave(roomName(permalink, 'admin'));
+                socket.leave(roomName(permalink, 'client'));
             };
 
             // set the new permalink
             permalink = room.name;
 
+            // initialize room if not already in use
+            if (rooms[permalink] === undefined) {
+                rooms[permalink] = [];
+            }
+
             // Separate room for admin commands
             if (room.admin === true) {
-                socket.join(admin_prefix+permalink);
+                socket.join(roomName(permalink, 'admin'));
                 // Send admin init data
                 quizQuery(permalink).exec(function (err, quiz) {
                     socket.emit( 'admin:initdata', quiz );
@@ -59,20 +74,18 @@ module.exports = function (io) {
             };
 
             // Join the room
-            socket.join(permalink);
-            // Join chats
+            socket.join(roomName(permalink, 'client'));
         });
 
         socket.on('test:newanswer', function (id) {
-            io.sockets.in(admin_prefix+permalink).emit('admin:newanswer', id);
+            socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:newanswer', id);
         })
-
 
         /***************************
          * Chat
          ***************************/
         socket.on('chat:init', function () {
-            socket.join(chat_prefix+permalink);
+            socket.join(roomName(permalink, 'chat'));
             socket.emit('chat:roomStatus',rooms[permalink]);
         });
 
@@ -80,18 +93,18 @@ module.exports = function (io) {
             if(currentUser)
                 data.sender = currentUser;
             Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
-            socket.broadcast.to(chat_prefix+permalink).emit('chat:message', data);
+            socket.broadcast.to(roomName(permalink, 'chat')).emit('chat:message', data);
             socket.emit('chat:message', data); // Send message to sender
             rooms[permalink][data.topic].messages.push(data);
         });
 
         socket.on('chatclient:topic', function(data) {
-            data.index = rooms[permalink].length; // This line causes a lot of errors. Should add some error handling
+            data.index = rooms[permalink].length;
             data.messages = [];
             if(currentUser)
                 data.sender = currentUser;
             Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
-            socket.broadcast.to(chat_prefix+permalink).emit('chat:topic', data);
+            socket.broadcast.to(roomName(permalink, 'chat')).emit('chat:topic', data);
             rooms[permalink].push(data);
 
             // Send topic to sender
@@ -100,7 +113,7 @@ module.exports = function (io) {
         });
 
         socket.on('studentclient:question', function(data) {
-            socket.broadcast.to(client_prefix+permalink).emit('server:question', data);
+            socket.broadcast.to(roomName(permalink, 'client')).emit('server:question', data);
         });
 
         /***************************
@@ -108,7 +121,7 @@ module.exports = function (io) {
          ***************************/
          // TODO: remove this. Just for demo purposes
          socket.on('chartclient:series', function(data) {
-            socket.broadcast.to(client_prefix+permalink).emit('chart:series', data);
+            socket.broadcast.to(roomName(permalink, 'client')).emit('chart:series', data);
          });
 
 
@@ -119,7 +132,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.chatIsActive = isActive;
                 quiz.save();
-                io.sockets.in(admin_prefix+permalink).emit('admin:chatStatusUpdated', isActive);
+                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:chatStatusUpdated', isActive);
                 // TODO: send some message to the chat directive
             });
         });
@@ -130,10 +143,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
-
-
-
-                io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
+                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
             });
 
             // TODO: send some message to the chat directive
@@ -144,7 +154,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = null;
                 quiz.save();
-                io.sockets.in(admin_prefix+permalink).emit('admin:questionDeactivated');
+                socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
             });
         });
 
@@ -156,7 +166,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.questions.push(question);
                 quiz.save(function () {
-                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                    socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
                 });
             });
         });
@@ -177,7 +187,7 @@ module.exports = function (io) {
                     };
                 };
                 quiz.save(function (err) {
-                    io.sockets.in(admin_prefix+permalink).emit('admin:questionChange', updatedQuestion);
+                    socket.broadcast.to(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
                 });
             });
         });
