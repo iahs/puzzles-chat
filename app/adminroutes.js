@@ -47,21 +47,30 @@ module.exports = function(app) {
      * Create a new quiz
      */
     app.post('/admin/quiz/:permalink', isLoggedIn, function (req, res) {
-        // Add authentication, and creator id
-        var quiz = new Quiz();
+        Quiz.findOne({permalink: req.params.permalink}, function (err, oquiz) {
+            if (oquiz) {
+                // The permalink is already taken
+                res.redirect('/admin'); // TODO: add a flash message
+            } else  {
+                var quiz = new Quiz();
+                quiz.name = req.body.title;
+                quiz.description = req.body.description;
+                quiz.permalink = req.params.permalink;
+                quiz.owner = req.user._id;
+                quiz.topics = [];
+                quiz.chatIsActive = 1;
 
-        quiz.name = req.body.title;
-        quiz.description = req.body.description;
-        quiz.permalink = req.params.permalink;
-        quiz.owner = req.user._id;
-        quiz.topics = [];
-        quiz.chatIsActive = 1;
+                quiz.save(function (err) {
+                    if (err)
+                        throw err;
+                    res.redirect('/admin/quiz/' + req.params.permalink);
+                });
+            }
+        })
+    });
 
-        quiz.save(function (err) {
-            if (err)
-                throw err;
-            res.redirect('/admin/quiz/' + req.params.permalink);
-        });
+    app.get('/admin/class/:permalink', isLoggedIn, function (req, res) {
+        res.render('admin/class');
     });
 
 

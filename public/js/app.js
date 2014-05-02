@@ -245,3 +245,10 @@ app.controller('AdminDetailsController', function ($scope, socket) {
 
 
 })
+
+app.controller('AdminClassController', function ($scope, $window, socket) {
+    var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
+
+
+});
+

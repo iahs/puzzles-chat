@@ -8,19 +8,19 @@
             <h4 id="myModalLabel" class="modal-title">Add question</h4>
         </div>
         <div class="modal-body">
-            <form role="form">
+            <form action="#" role="form"  ng-submit="newQuestion.addAlternative()">
                 <legend>Question</legend>
                 <div class="form-group">
-                    <input placeholder="name" ng-model="newQuestion.name" class="form-control"/>
+                    <input placeholder="name" ng-model="newQuestion.name" class="form-control" required/>
                 </div>
                 <div class="form-group">
-                    <textarea placeholder="question" ng-model="newQuestion.question" class="form-control"></textarea>
+                    <textarea placeholder="question" ng-model="newQuestion.question" class="form-control" required></textarea>
                 </div>
                 <legend>Alternatives</legend>
                 <div ng-repeat="alt in newQuestion.alternatives" class="form-group">
                     <input ng-model="alt.name" placeholder="Enter value here" class="form-control"/>
                 </div>
-                <button ng-click="newQuestion.addAlternative()" class="btn">Add alternative</button>
+                <input type="submit" class="btn" value="Add alternative">
             </form>
         </div>
         <div class="modal-footer">
