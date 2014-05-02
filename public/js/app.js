@@ -239,9 +239,4 @@ app.controller('AdminDetailsController', function ($scope, socket) {
             $scope.sortBy = string;
         }
     }
-
-
-
-
-
-})
+});

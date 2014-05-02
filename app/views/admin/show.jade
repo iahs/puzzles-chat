@@ -20,7 +20,7 @@ block content
                     button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Deactivate chat
                     button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Detailed responses
                     button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Add admin
-            h2  {{ quiz.name  }} - {{ location }}
+            h2  {{ quiz.name }}
             p(mathjax-bind="visibleQuestion.question")
             h4 Alternatives
             ul
