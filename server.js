@@ -1,5 +1,4 @@
 var express = require('express'),
-    logger = require('morgan'),
     connect = require('connect'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
@@ -35,7 +34,6 @@ var app = express(),
  * Middleware handlers
  * Load and initialize sockets
  **************************/
-// app.use(logger());
 app.use(cookieParser(COOKIE_SECRET));
 app.use(bodyParser());
 app.use(session( { store: mongoStore, secret: COOKIE_SECRET, key: EXPRESS_SID_KEY } ));

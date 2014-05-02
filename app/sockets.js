@@ -76,7 +76,7 @@ module.exports = function (io) {
             socket.join(roomName(permalink, 'chat'));
             socket.emit('chatserver:roomStatus',rooms[permalink]);
             quizQuery(permalink).exec(function (err, quiz) {
-                socket.emit('admin:chatStatusUpdated', quiz.chatIsActive);
+                if(quiz) socket.emit('admin:chatStatusUpdated', quiz.chatIsActive);
             });
         });
 
