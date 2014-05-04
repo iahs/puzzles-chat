@@ -76,6 +76,15 @@ module.exports = function(app) {
         })
     });
 
+    /**
+     * Delete a quiz
+     */
+    app.post('/admin/quiz/:permalink/delete', isLoggedIn, function (req, res) {
+        Quiz.findOneAndRemove({permalink: req.params.permalink}, function (err) {
+            res.redirect('/admin');
+        });
+    });
+
     app.get('/admin/group/:permalink', isLoggedIn, function (req, res) {
         Group.findOne({permalink: req.params.permalink}, function(err, group) {
             if (group) {
@@ -110,6 +119,15 @@ module.exports = function(app) {
                 });
             }
         })
+    });
+
+    /**
+     * Delete a group
+     */
+    app.post('/admin/group/:permalink/delete', isLoggedIn, function (req, res) {
+        Group.findOneAndRemove({permalink: req.params.permalink}, function (err) {
+            res.redirect('/admin/groups');
+        });
     });
 
 

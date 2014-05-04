@@ -32,7 +32,8 @@ Quiz.find({ }, function (err, quizzes) {
 module.exports = function (io) {
     io.sockets.on('connection', function(socket) {
         var permalink,
-        currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email;
+            currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email,
+            currentUserId = socket.handshake.user._id;
 
         /**
          * Join a room for a specific quiz
@@ -114,6 +115,14 @@ module.exports = function (io) {
 
             // Mongo update does not work
             quizQuery(permalink).exec(function (err, quiz) {
+
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    console.log("Acces denied");
+                    console.log(quiz.owner);
+                    console.log(currentUserId)
+                    return "";
+                };
+
                 quiz.chatIsActive = isActive;
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
@@ -122,7 +131,7 @@ module.exports = function (io) {
         });
 
         socket.on('admin:activateQuestion', function (question) {
-            console.log('Activating question', question);
+
             // Mongo update does not work
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
@@ -268,4 +277,9 @@ function quizQuery(permalink) {
  */
 function validateEmail(email) {
     return  /(.+)@(.+){1,}\.(.+){1,}/.test(email);
+}
+
+function canEditQuiz(userId, quiz) {
+    console.log(quiz.owner==userId)
+    return quiz.owner == userId;
 }

@@ -275,5 +275,5 @@ app.controller('AdminGroupController', function ($scope, $window, socket) {
 });
 
 app.controller('AdminGroupsController', function ($scope) {
-    
+
 });
