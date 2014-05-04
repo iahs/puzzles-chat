@@ -5,9 +5,13 @@ block content
         .col-lg-2
             ul.list-group
                 h3.list-group-item-heading Questions
-                li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question===visibleQuestion}")
+                li.list-group-item(ng-repeat="question in quiz.questions", ng-class="{active: question===visibleQuestion}")
                     a(ng-click="viewQuestion(question)") {{ question.name }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
+            ul.list-group
+                h3.list-group-item-heading Groups
+                li.list-group-item(ng-repeat="group in quiz.groups")
+                    a(ng-href="/admin/group/{{group.permalink}}") {{ group.name }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addGroup') Add group
         .col-lg-6
             nav.navbar.navbar-default(role="navigation")
@@ -15,8 +19,8 @@ block content
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                     a(href="#" class="navbar-brand") Actions
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.activateQuestion()" ng-hide="quiz.activeQuestionId==visibleQuestion._id") Question on
-                    button.btn.btn-danger.navbar-btn.btn.ng-hide(ng-click="actions.deactivateQuestion()" ng-show="quiz.activeQuestionId==visibleQuestion._id") Question off
+                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.activateQuestion()", ng-hide="quiz.activeQuestionId==visibleQuestion._id") Question on
+                    button.btn.btn-danger.navbar-btn.btn.ng-hide(ng-click="actions.deactivateQuestion()", ng-show="quiz.activeQuestionId==visibleQuestion._id") Question off
                     button.btn.btn-info.navbar-btn.btn(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Chat on
                     button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Chat off
                     button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Details
@@ -68,11 +72,12 @@ block content
                         button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
                         h4#addGroupLabel.modal-title Add group
                     .modal-body
-                        form(role="form", ng-submit="newGroup.addAlternative()")
+                        form(role="form", ng-submit="newGroup.add()")
                             legend Group
+                            p Only existing groups will be added to the quiz. Please create any new groups before
+                            | you add them to the quiz
                             .form-group
-                                input.form-control(placeholder="name", ng-model="newGroup.permalink" required)
-                    .modal-footer
-                        button.btn.btn-default(type='button', data-dismiss='modal') Close
-                        button.btn.btn-primary(ng-click="newGroup.submit()") Add group
-
+                                input.form-control(placeholder="name", ng-model="newGroup.permalink", required)
+                            .modal-footer
+                                button.btn.btn-default(type='button', data-dismiss='modal') Close
+                                button.btn.btn-primary(type="submit") Add group

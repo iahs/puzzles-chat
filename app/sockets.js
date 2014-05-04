@@ -155,11 +155,17 @@ module.exports = function (io) {
             });
         });
 
+        /**
+         * TODO: not implemented
+         */
         socket.on('admin:removeQuestion', function (questionId) {
 
 
         });
 
+        /**
+         * TODO: not implemented
+         */
         socket.on('admin:addAlternative', function (question, alternative) {
             if (!permalink) return;
             quizQuery(permalink).exec(function (err, quiz) {
@@ -176,6 +182,20 @@ module.exports = function (io) {
                 });
             });
         });
+
+
+        socket.on('admin:addGroup', function (groupPermalink) {
+
+            Group.findOne({permalink:groupPermalink}, function (err, group) {
+                if (!group) return;
+                quizQuery(permalink).exec(function (err, quiz) {
+                    quiz.groups.push(group._id);
+                    quiz.save(function (err) {
+                        // Notify client
+                    })
+                })
+            })
+        })
 
         socket.on('test:newanswer', function (id) {
             io.sockets.in(roomName(permalink, 'admin')).emit('admin:newanswer', id);
@@ -236,7 +256,8 @@ module.exports = function (io) {
  * @returns {*}
  */
 function quizQuery(permalink) {
-    return Quiz.findOne({ permalink: permalink });
+    // Todo: move populate to where we need it
+    return Quiz.findOne({ permalink: permalink }).populate('groups');
 };
 
 /**
@@ -245,6 +266,6 @@ function quizQuery(permalink) {
  * @param email
  * @returns {*|boolean}
  */
-function validateEmail(email) {
+function validateEmail(email) {spli
     return  /(.+)@(.+){1,}\.(.+){1,}/.test(email);
 }

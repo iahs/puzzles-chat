@@ -206,6 +206,17 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         }
     };
 
+    $scope.newGroup = {
+        permalink: "",
+        add: function () {
+            if (this.permalink) {
+                socket.emit("admin:addGroup", this.permalink)
+                this.permalink = "";
+                $('#addGroup').modal('hide');
+            };
+        }
+    };
+
     // Grouping of the actions in the action bar
     $scope.actions = {
         setChatStatus: function (status) {
