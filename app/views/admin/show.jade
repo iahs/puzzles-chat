@@ -59,7 +59,7 @@ block content
                                     input(type="checkbox" ng-model="alt.isCorrect")
                                     | Is correct
                                 button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
-                            button.btn(ng-click="newQuestion.addAlternative()") Add alternative
+                            button.btn(type="button", ng-click="newQuestion.addAlternative()") Add alternative
 
                             .modal-footer
                                 button.btn.btn-default(type='button', data-dismiss='modal') Close
