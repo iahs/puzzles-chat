@@ -97,15 +97,20 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
         var questionUpdated = false;
+
         for (var i=0; i<$scope.quiz.questions.length; i++) {
-            if (question._id.equals($scope.quiz.questions[i]._id)) {
-                console.log("UPDATING QUESTION")
+            if (question._id == $scope.quiz.questions[i]._id) {
                 // Update the object
                 $scope.quiz.questions[i] = question;
+                // Have to update the view if that question is being viewed
+                if ($scope.visibleQuestion._id == question._id) {
+                    $scope.visibleQuestion = $scope.quiz.questions[i];
+                }
+
                 questionUpdated = true;
                 break;
-            }
-        }
+            };
+        };
         if (!questionUpdated)
             $scope.quiz.questions.push(question);
     });
@@ -122,18 +127,6 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.quiz.activeQuestionId = '';
     });
 
-    socket.on('admin:newanswer', function (alternativeId) {
-        for(var i=0; i<$scope.answers.length; i++) {
-            if ($scope.answers[i].id === alternativeId) {
-                console.log($scope.answers[i]);
-                $scope.answers[i].data[0] += 1;
-            }
-        }
-    });
-
-    socket.on('admin:newAlternative', function (data) {
-        // Find the right question, and add the alternative
-    });
 
 
     $scope.newAlternative = {
@@ -147,6 +140,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             this.permalink = $scope.quiz.permalink;
             this.questionId = question._id;
             socket.emit('admin:addAlternative', this);
+            console.log(this);
 
             // Reset and close window
             this.name = '';

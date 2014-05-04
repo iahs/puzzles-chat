@@ -117,10 +117,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
 
                 if (!canEditQuiz(currentUserId, quiz)) {
-                    console.log("Acces denied");
-                    console.log(quiz.owner);
-                    console.log(currentUserId)
-                    return "";
+                    return;
                 };
 
                 quiz.chatIsActive = isActive;
@@ -179,17 +176,19 @@ module.exports = function (io) {
         socket.on('admin:addAlternative', function (alternative) {
             quizQuery(permalink).exec(function (err, quiz) {
                 if (!quiz) return;
-                var changedIndex;
+                var updatedQuestion;
                 for (var i=0; i<quiz.questions.length; i++) {
                     if (quiz.questions[i]._id.equals(alternative.questionId)) {
+                        console.log("FOUND MATCH")
                         quiz.questions[i].alternatives.push(alternative);
-                        changedIndex = i;
+                        updatedQuestion = quiz.questions[i];
                         break;
                     };
                 };
                 quiz.save(function (err) {
-                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[changedIndex]);
-                    // BUG: above message sends undefined
+                    console.log("updated question");
+                    console.log(updatedQuestion);
+                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
                 });
             });
         });

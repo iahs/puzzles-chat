@@ -24,7 +24,6 @@ block content
                     button.btn.btn-info.navbar-btn.btn(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Chat on
                     button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Chat off
                     button.btn.btn-warning.navbar-btn(ng-click="actions.viewResponses()") Details
-                    button.btn.btn-default.navbar-btn(ng-click="actions.addAdmin()") Admins
             h2  {{ quiz.name  }}
 
             p(mathjax-bind="visibleQuestion.question")
