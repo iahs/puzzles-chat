@@ -273,3 +273,7 @@ app.controller('AdminGroupController', function ($scope, $window, socket) {
         socket.emit('admin:group:removeMember', {permalink: groupPermalink, email: member} );
     };
 });
+
+app.controller('AdminGroupsController', function ($scope) {
+    
+});

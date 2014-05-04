@@ -13,6 +13,12 @@ module.exports = function(app) {
         });
     });
 
+    app.get('/admin/groups', isLoggedIn, function(req, res) {
+        Group.find({ owner: req.user._id }, function (err, groups) {
+            res.render('admin/groups', { user: req.user, groups: groups });
+        });
+    });
+
     /**
      * Manage a quiz
      */

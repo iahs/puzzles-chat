@@ -1,0 +1,32 @@
+extends ../layout
+block content
+    #admin-dashboard(ng-controller="AdminGroupsController")
+        .col-md-9
+            h1 My Groups
+            p Here you can manage your groups and create new ones.
+            table.table
+                thead
+                    tr
+                        td Name
+                        td Permalink
+                        td Members
+                        td Actions
+                tbody
+                    each group in groups
+                        tr
+                            td= group.name
+                            td= group.permalink
+                            td= group.members.length
+                            td
+                                a.btn.btn-sm.btn-primary(href="/admin/group/#{group.permalink}") Manage
+            input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
+            a.btn.btn-primary(ng-href="/admin/group/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new group
+        .col-md-3.well
+            h3 Profile
+            dl(style="word-wrap: break-word;")
+                dt Id
+                dd= user.id
+                dt Email
+                dd= user.local.email
+                dt Password hash
+                dd= user.local.password
