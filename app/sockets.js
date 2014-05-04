@@ -174,24 +174,25 @@ module.exports = function (io) {
 
         /**
          * TODO: not implemented
+         * alternative has the property questionId
          */
-        socket.on('admin:addAlternative', function (question, alternative) {
-            if (!permalink) return;
+        socket.on('admin:addAlternative', function (alternative) {
             quizQuery(permalink).exec(function (err, quiz) {
-                var updatedQuestion;
+                if (!quiz) return;
+                var changedIndex;
                 for (var i=0; i<quiz.questions.length; i++) {
-                    var q = quiz.questions[i]
-                    if (q._id === question._id) {
-                        q.alternatives.push(alternative);
-                        updatedQuestion = q;
+                    if (quiz.questions[i]._id.equals(alternative.questionId)) {
+                        quiz.questions[i].alternatives.push(alternative);
+                        changedIndex = i;
+                        break;
                     };
                 };
                 quiz.save(function (err) {
-                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
+                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[changedIndex]);
+                    // BUG: above message sends undefined
                 });
             });
         });
-
 
         socket.on('admin:addGroup', function (groupPermalink) {
 
@@ -279,7 +280,12 @@ function validateEmail(email) {
     return  /(.+)@(.+){1,}\.(.+){1,}/.test(email);
 }
 
+/**
+ *
+ * @param String userId
+ * @param Quiz quiz
+ * @returns {Boolean|Bool|boolean|Query|*}
+ */
 function canEditQuiz(userId, quiz) {
-    console.log(quiz.owner==userId)
-    return quiz.owner == userId;
+    return quiz.owner.equals(userId);
 }

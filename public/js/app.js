@@ -98,10 +98,12 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     socket.on('admin:questionChange', function (question) {
         var questionUpdated = false;
         for (var i=0; i<$scope.quiz.questions.length; i++) {
-            if ($scope.quiz.questions[i]._id === question._id) {
+            if (question._id.equals($scope.quiz.questions[i]._id)) {
+                console.log("UPDATING QUESTION")
                 // Update the object
                 $scope.quiz.questions[i] = question;
                 questionUpdated = true;
+                break;
             }
         }
         if (!questionUpdated)
@@ -129,30 +131,27 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         }
     });
 
-    $scope.addAlternative = function (quiz, alternative) {
-        socket.emit('addAlternative', {
-            questionId: $scope.visibleQuestion._id,
-            alternative: alternative
-        });
-    };
-
     socket.on('admin:newAlternative', function (data) {
         // Find the right question, and add the alternative
     });
 
 
     $scope.newAlternative = {
-        name: 'New alternative',
+        name: '',
         isCorrect: false,
         answers: [],
         submit: function (question) {
-            if (!question)
+            if (!question || !this.name)
                 return;
-            console.log(this);
-            socket.emit('admin:addAlternative', {
-                questionId: question._id,
-                alternative: this
-            });
+
+            this.permalink = $scope.quiz.permalink;
+            this.questionId = question._id;
+            socket.emit('admin:addAlternative', this);
+
+            // Reset and close window
+            this.name = '';
+            this.isCorrect = false,
+            $('#addAlternative').modal('hide');
         }
     };
 

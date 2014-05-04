@@ -31,7 +31,7 @@ block content
             h4 Alternatives
             ul
                 li(ng-repeat="alt in visibleQuestion.alternatives") {{alt.name}} ({{alt.answers.length}})
-            button.btn(ng-click="newAlternative.submit(visibleQuestion)") Add alternative
+            button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addAlternative') Add alternative
 
             question-results(answers="answers")
             button.btn(ng-click="plusOne()") Click me
@@ -40,7 +40,7 @@ block content
             responsebox
 
 
-        #addQuestion.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+        #addQuestion.modal.fade(tabindex='-1', role='dialog', aria-labelledby='addQuestionLabel', aria-hidden='true')
             .modal-dialog
                 .modal-content
                     .modal-header
@@ -65,6 +65,26 @@ block content
                             .modal-footer
                                 button.btn.btn-default(type='button', data-dismiss='modal') Close
                                 button.btn.btn-primary(type="submit") Add question
+
+        #addAlternative.modal.fade(tabindex='-1', role='dialog', aria-labelledby='addAlternativeLabel', aria-hidden='true')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                        h4#addAlternativeLabel.modal-title Add alternative
+                    .modal-body
+                        form(role="form", ng-submit="newAlternative.submit(visibleQuestion)")
+                            .form-group
+                                label(for="newAlternativeName") Alternative
+                                input#newAlternativeName.form-control(ng-model="newAlternative.name", name="newAlternativeName", placeholder="Enter value here", required)
+                            .form-group
+                                label(class="checkbox")
+                                    input(type="checkbox" ng-model="newAlternative.isCorrect")
+                                    | Is correct
+                            .modal-footer
+                                button.btn.btn-default(type='button', data-dismiss='modal') Close
+                                button.btn.btn-primary(type="submit") Add alternative
+
 
         #addGroup.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
             .modal-dialog
