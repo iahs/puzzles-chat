@@ -1,5 +1,6 @@
 var Quiz = require('../app/models/quiz.js'),
-    Question = require('../app/models/question.js');
+    Question = require('../app/models/question.js'),
+    Group = require('../app/models/group.js');
 
 module.exports = function(app) {
     /**
@@ -53,7 +54,7 @@ module.exports = function(app) {
                 res.redirect('/admin'); // TODO: add a flash message
             } else  {
                 var quiz = new Quiz();
-                quiz.name = req.body.title;
+                quiz.name = req.body.name;
                 quiz.description = req.body.description;
                 quiz.permalink = req.params.permalink;
                 quiz.owner = req.user._id;
@@ -69,8 +70,40 @@ module.exports = function(app) {
         })
     });
 
-    app.get('/admin/class/:permalink', isLoggedIn, function (req, res) {
-        res.render('admin/class');
+    app.get('/admin/group/:permalink', isLoggedIn, function (req, res) {
+        Group.findOne({permalink: req.params.permalink}, function(err, group) {
+            if (group) {
+                // TODO: add authentication here to check that user is admin for quiz
+                res.render('admin/group');
+            } else {
+                res.render('admin/newGroup', { permalink: req.params.permalink });
+            };
+        });
+    });
+
+    /**
+     * Create a new group
+     */
+    app.post('/admin/group/:permalink', isLoggedIn, function (req, res) {
+        Group.findOne({permalink: req.params.permalink}, function (err, ogroup) {
+            if (ogroup) {
+                // The permalink is already taken
+                res.redirect('/admin'); // TODO: add a flash message
+            } else  {
+                var group = new Group();
+                group.name = req.body.name;
+                group.description = req.body.description;
+                group.permalink = req.params.permalink;
+                group.owner = req.user._id;
+                group.members = [];
+
+                group.save(function (err) {
+                    if (err)
+                        throw err;
+                    res.redirect('/admin/group/' + req.params.permalink);
+                });
+            }
+        })
     });
 
 

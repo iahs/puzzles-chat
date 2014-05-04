@@ -1,0 +1,23 @@
+extends ../layout
+block content
+    #admin-group(ng-controller="AdminGroupController")
+        h1 {{ group.name }}
+        p {{ group.description }}
+        form.form
+            .form-group
+                label(for="emailstring") Add members. Emails separated by comma
+                textarea.form-control(ng-model="group.emailString", name="emailstring", id="emailstring")
+            button.btn.btn-primary(ng-click="addMembers()") Add members
+
+        table.table.table-striped
+            thead
+                tr
+                    th Email
+                    th Actions
+            tbody
+                tr(ng-repeat="member in group.members")
+                    td {{ member }}
+                    td
+                        button.btn.btn-danger(ng-click="removeMember(member)") Remove
+
+

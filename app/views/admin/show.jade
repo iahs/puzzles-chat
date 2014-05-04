@@ -8,6 +8,7 @@ block content
                 li.list-group-item(ng-repeat="question in quiz.questions" ng-class="{active: question===visibleQuestion}")
                     a(ng-click="viewQuestion(question)") {{ question.name }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
+            button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addGroup') Add group
         .col-lg-6
             nav.navbar.navbar-default(role="navigation")
                 .navbar-header
@@ -39,23 +40,39 @@ block content
                 .modal-content
                     .modal-header
                         button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-                        h4#myModalLabel.modal-title Add question
+                        h4#addQuestionLabel.modal-title Add question
                     .modal-body
-                        form(role="form", ng-submit="newQuestion.addAlternative()")
+                        form(role="form", ng-submit="newQuestion.submit()")
                             legend Question
                             .form-group
-                                input.form-control(placeholder="name", ng-model="newQuestion.name" required)
+                                input.form-control(placeholder="name", ng-model="newQuestion.name", required)
                             .form-group
-                                textarea.form-control(placeholder="question", ng-model="newQuestion.question" required)
+                                textarea.form-control(placeholder="question", ng-model="newQuestion.question", required)
                             legend Alternatives
                             .form-group(ng-repeat="alt in newQuestion.alternatives")
-                                input.form-control(ng-model="alt.name", placeholder="Enter value here" required)
+                                input.form-control(ng-model="alt.name", placeholder="Enter value here", required)
                                 label(class="checkbox")
                                     input(type="checkbox" ng-model="alt.isCorrect")
                                     | Is correct
                                 button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
-                            input.btn(type="submit", value="Add alternative")
+                            button.btn(ng-click="newQuestion.addAlternative()") Add alternative
 
+                            .modal-footer
+                                button.btn.btn-default(type='button', data-dismiss='modal') Close
+                                button.btn.btn-primary(type="submit") Add question
+
+        #addGroup.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                        h4#addGroupLabel.modal-title Add group
+                    .modal-body
+                        form(role="form", ng-submit="newGroup.addAlternative()")
+                            legend Group
+                            .form-group
+                                input.form-control(placeholder="name", ng-model="newGroup.permalink" required)
                     .modal-footer
                         button.btn.btn-default(type='button', data-dismiss='modal') Close
-                        button.btn.btn-primary(ng-click="newQuestion.submit()") Add question
+                        button.btn.btn-primary(ng-click="newGroup.submit()") Add group
+

@@ -1,5 +1,7 @@
 var Quiz = require('./models/quiz'),
     Question = require('./models/question'),
+    Group = require('./models/group'),
+    User = require('./models/user'),
     passport = require('passport') || 'ERROR',
     mongoose = require('mongoose') || 'ERROR';
 
@@ -17,7 +19,6 @@ var roomName = function (permalink, type) {
             throw new Error('Unknown room type');
     }
 };
-
 
 // Store the entire log in memory, and only write to database
 // One instance shared across requests
@@ -154,7 +155,8 @@ module.exports = function (io) {
             });
         });
 
-        socket.on('admin:removeQuestion', function () {
+        socket.on('admin:removeQuestion', function (questionId) {
+
 
         });
 
@@ -182,6 +184,50 @@ module.exports = function (io) {
         socket.on('studentclient:question', function(data) {
             socket.broadcast.to(roomName(permalink, 'client')).emit('server:question', data);
         });
+
+
+        /***************************
+         * Classes (group of users)
+         * Uses admin namespace for messages
+         ***************************/
+        socket.on('admin:group:addMembers', function (groupData) {
+            if (! groupData || !groupData.emailString) return;
+            Group.findOne({ permalink: groupData.permalink }, function (err, group) {
+                if (!group) return;
+                console.log('got data to add')
+
+                // Extract email addresses from a comma-separated string
+                var emails = groupData.emailString.replace(/\s+/g, '').split(',');
+                console.log(emails);
+
+                emails.forEach(function (email) {
+                    if (group.members.indexOf(email)<0 && validateEmail(email)) {
+                        group.members.push(email);
+                    }
+                });
+                group.save(function (err) {
+                    socket.emit('admin:groupData', group)
+                });
+
+            });
+        });
+
+        socket.on('admin:group:removeMember', function (data) {
+          Group.findOne({permalink: data.permalink}, function (err, group) {
+              var index = group.members.indexOf(data.email);
+              group.members.splice(index, 1);
+              group.save(function (err) {
+                  socket.emit('admin:groupData', group)
+              });
+          });
+        });
+
+        socket.on('admin:manage_group', function (permalink) {
+            // Todo: check group owner vs user id for access
+            Group.findOne({ permalink: permalink }, function (err, group) {
+                socket.emit('admin:groupData', group)
+            });
+        });
     });
 };
 
@@ -193,3 +239,12 @@ function quizQuery(permalink) {
     return Quiz.findOne({ permalink: permalink });
 };
 
+/**
+ * Super simple check too see if
+ * a string resembles an email
+ * @param email
+ * @returns {*|boolean}
+ */
+function validateEmail(email) {
+    return  /(.+)@(.+){1,}\.(.+){1,}/.test(email);
+}

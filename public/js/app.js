@@ -114,7 +114,6 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
 
     socket.on('admin:questionActivated', function (question) {
         $scope.quiz.activeQuestionId = question._id;
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "body"]);
     });
 
     socket.on('admin:questionDeactivated', function () {
@@ -239,16 +238,32 @@ app.controller('AdminDetailsController', function ($scope, socket) {
             $scope.sortBy = string;
         }
     }
+});
 
+/**
+ * Users can create groups of emails
+ * to easily allow access to quizzes
+ */
+app.controller('AdminGroupController', function ($scope, $window, socket) {
+    var groupPermalink = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
 
+    $scope.group = {};
+    socket.emit('admin:manage_group', groupPermalink);
 
+    socket.on('admin:groupData', function (group) {
+        $scope.group = group;
+        $scope.group.emailString = "";
+        console.log(JSON.stringify(group))
+    });
 
+    $scope.addMembers = function () {
+        if (!$scope.group.emailString) return;
+        socket.emit('admin:group:addMembers', $scope.group);
+        $scope.group.emailString = "";
+    };
 
-})
-
-app.controller('AdminClassController', function ($scope, $window, socket) {
-    var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
-
-
+    $scope.removeMember = function (member) {
+        socket.emit('admin:group:removeMember', {permalink: groupPermalink, email: member} );
+    };
 });
 
