@@ -251,10 +251,6 @@ app.controller('AdminDetailsController', function ($scope, socket) {
     }
 });
 
-/**
- * Users can create groups of emails
- * to easily allow access to quizzes
- */
 app.controller('AdminGroupController', function ($scope, $window, socket) {
     var groupPermalink = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
 
@@ -277,4 +273,3 @@ app.controller('AdminGroupController', function ($scope, $window, socket) {
         socket.emit('admin:group:removeMember', {permalink: groupPermalink, email: member} );
     };
 });
-
