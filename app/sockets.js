@@ -266,6 +266,6 @@ function quizQuery(permalink) {
  * @param email
  * @returns {*|boolean}
  */
-function validateEmail(email) {spli
+function validateEmail(email) {
     return  /(.+)@(.+){1,}\.(.+){1,}/.test(email);
 }
