@@ -5,7 +5,7 @@ block content
         .col-lg-2
             ul.list-group
                 h3.list-group-item-heading Questions
-                li.list-group-item(ng-repeat="question in quiz.questions", ng-class="{active: question===visibleQuestion}")
+                li.list-group-item(ng-repeat="question in quiz.questions", ng-class="{active: question._id===quiz.activeQuestionId, visible: question===visibleQuestion}")
                     a(ng-click="viewQuestion(question)") {{ question.name }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
             ul.list-group
