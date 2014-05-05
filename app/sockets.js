@@ -232,11 +232,22 @@ module.exports = function (io) {
                     socket.emit('flash:message', {type: 'warning', message: "Could not find group " + groupPermalink});
                 };
                 quizQuery(permalink).exec(function (err, quiz) {
-                    quiz.groups.push(group._id);
-                    quiz.save(function (err) {
-                        io.sockets.in(roomName(permalink, 'admin')).emit('admin:groupChange', group);
-                        socket.emit('flash:message', {type: 'success', message: "Group added"});
-                    });
+                    var alreadyAdded = false;
+                    for (var i=0; i<quiz.groups.length; i++) {
+                        if (quiz.groups[i]._id.equals(group._id)) {
+                            alreadyAdded = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyAdded) {
+                        quiz.groups.push(group._id);
+                        quiz.save(function (err) {
+                            io.sockets.in(roomName(permalink, 'admin')).emit('admin:groupChange', group);
+                            socket.emit('flash:message', {type: 'success', message: "Group added"});
+                        });
+                    } else {
+                        socket.emit('flash:message', {type: 'info', message: "Group has already been added to quiz"});
+                    };
                 });
             });
         });
@@ -257,12 +268,12 @@ module.exports = function (io) {
         socket.on('admin:group:addMembers', function (groupData) {
             if (! groupData || !groupData.emailString) return;
             Group.findOne({ permalink: groupData.permalink }, function (err, group) {
-                if (!group) return;
-                console.log('got data to add')
+                if (!group) {
+                    socket.emit('flash:message', {type: 'danger', message: "Could not find group"});
+                };
 
                 // Extract email addresses from a comma-separated string
                 var emails = groupData.emailString.replace(/\s+/g, '').split(',');
-                console.log(emails);
 
                 emails.forEach(function (email) {
                     if (group.members.indexOf(email)<0 && validateEmail(email)) {
