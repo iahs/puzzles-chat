@@ -33,8 +33,7 @@ module.exports = function (io) {
         var permalink,
             currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email,
             currentUserId = socket.handshake.user._id,
-            currentUserEmail = socket.handshake.user.local.email,
-            currentUserObj = socket.handshake.user;
+            currentUserEmail = socket.handshake.user.local.email;
 
         /**
          * Join a room for a specific quiz
@@ -80,14 +79,14 @@ module.exports = function (io) {
                     }
                     if (hasAccess) {
                         socket.join(roomName(permalink, 'client'));
-                        socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
+                        socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz, currentUserId));
                     } else {
                         socket.emit('flash:message', {type: 'danger', message:" This is a private quiz. Please contact the owner for access"});
                     }
                 } else {
                     // Quiz is public. Everyone can join
                     socket.join(roomName(permalink, 'client'));
-                    socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
+                    socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz, currentUserId));
                 };
             })
         });
@@ -151,7 +150,7 @@ module.exports = function (io) {
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
 
                 // Send simple version to client
-                var alternatives = getClientActiveQuestion(quiz);
+                var alternatives = getClientActiveQuestion(quiz, currentUserId);
                 io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
             });
         });
@@ -272,9 +271,9 @@ module.exports = function (io) {
                 var queryObj = {permalink: permalink},
                  updateObj = {$push: {}};
                 queryObj["questions." + qid + ".alternatives._id"] = data.selectedAnswer;
-                updateObj.$push["questions." + qid + ".alternatives.$.answers"] = currentUserObj;
+                updateObj.$push["questions." + qid + ".alternatives.$.answers"] = {owner: currentUserId};
 
-                 Quiz.update( queryObj, updateObj).exec();
+                 Quiz.update(queryObj, updateObj).exec();
             });
 
         });
@@ -337,15 +336,11 @@ function quizQuery(permalink) {
 
 /* * * * * * * * * *
 * @brief: get active question for client from a quiz
-*
-* @param[in]: quiz
-*
 * @return active question object
 * * * * * * * * * */
-function getClientActiveQuestion(quiz) {
+function getClientActiveQuestion(quiz, currentUserId) {
 
     if (!quiz.activeQuestionId) {
-        console.log(">>>> NO active question!!!");
         return {};
     }
 
@@ -358,21 +353,17 @@ function getClientActiveQuestion(quiz) {
             var q = { question:question.question, alternatives:[], questionId: question._id, selectedAnswer: "" };
 
             question.alternatives.forEach(function (d) {
-                console.log(">>>>>>" + d.name);
                 q.alternatives.push({name: d.name, id: d.id});
+                d.answers.forEach(function (a) {
+                    if(a.owner.equals(currentUserId)) {
+                        q.submitted = 1;
+                    }
+                });
             });
-
             return q;
-
         }
     };
-
-    console.log(">>>> Could not find active question!!!: " +
-    quiz.activeQuestionId);
-
     return {};
-
-
 }
 
 
