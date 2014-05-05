@@ -6,7 +6,7 @@ block content
             .well
                 h3 Question: {{ question.question }}
                 form(name='question', ng-submit='submitAnswer()')
-                    div.span4(ng-repeat='alternative in question.alternatives')
+                    div.q-opt.span4(ng-repeat='alternative in question.alternatives')
                         input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')
                         {{ alternative.name }}
                     br
