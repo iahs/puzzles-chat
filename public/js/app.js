@@ -201,7 +201,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     $scope.newQuestion = {
         alternatives: [],
         addAlternative: function () {
-            this.alternatives.push({ name: "Content here", isCorrect: false, answers: [] });
+            this.alternatives.push({ name: "", isCorrect: false, answers: [] });
         },
         removeAlternative: function (alt) {
             var a = this.alternatives;
