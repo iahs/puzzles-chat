@@ -116,6 +116,22 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             $scope.quiz.questions.push(question);
     });
 
+    // Same method as questionChange
+    socket.on('admin:groupChange', function (group) {
+        var groupUpdated = false;
+
+        for (var i=0; i<$scope.quiz.groups.length; i++) {
+            if (group._id == $scope.quiz.groups[i]._id) {
+                // Update the object
+                $scope.quiz.groups[i] = group;
+                groupUpdated = true;
+                break;
+            };
+        };
+        if (!groupUpdated)
+            $scope.quiz.groups.push(group);
+    });
+
     socket.on('admin:chatStatusUpdated', function (status) {
         $scope.quiz.chatIsActive = status;
     });

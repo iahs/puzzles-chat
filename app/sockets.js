@@ -228,15 +228,18 @@ module.exports = function (io) {
         socket.on('admin:addGroup', function (groupPermalink) {
 
             Group.findOne({permalink:groupPermalink}, function (err, group) {
-                if (!group) return;
+                if (!group) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find group " + groupPermalink});
+                };
                 quizQuery(permalink).exec(function (err, quiz) {
                     quiz.groups.push(group._id);
                     quiz.save(function (err) {
-                        // Notify client
-                    })
-                })
-            })
-        })
+                        io.sockets.in(roomName(permalink, 'admin')).emit('admin:groupChange', group);
+                        socket.emit('flash:message', {type: 'success', message: "Group added"});
+                    });
+                });
+            });
+        });
 
         socket.on('test:newanswer', function (id) {
             io.sockets.in(roomName(permalink, 'admin')).emit('admin:newanswer', id);
