@@ -67,14 +67,14 @@ module.exports = function (io) {
                 });
             } else {
 
-                // for a student client, should join room and then 
+                // for a student client, should join room and then
                 // send over the active question from the DB
                 socket.join(permalink);
 
                 quizQuery(permalink).exec(function (err, quiz) {
                     socket.emit( 'client:initdata', getClientActiveQuestion(quiz));
                 });
-                
+
             };
 
             // Join the room
@@ -110,7 +110,7 @@ module.exports = function (io) {
             io.sockets.in(roomName(permalink, 'chat')).emit('chatserver:topic', data);
             socket.emit('chatserver:selectTopic', data.index); // Make sender select new topic
         });
-        
+
         /***************************
          * Charts
          ***************************/
@@ -164,6 +164,7 @@ module.exports = function (io) {
                 quiz.activeQuestionId = null;
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
+                io.sockets.in(roomName(permalink, 'client')).emit('client:questionDeactivated');
             });
         });
 
@@ -258,12 +259,12 @@ module.exports = function (io) {
             console.log(JSON.stringify(data));
             console.log(data.selectedAnswer);
             quizQuery(permalink).exec(function (err, quiz) {
-                
+
                 console.log(JSON.stringify(quiz));
 
                 // if question is no longer the active question, do not update
                 if (!(data.questionId == quiz.activeQuestionId)) {
-                    console.log("It is not equal"); 
+                    console.log("It is not equal");
                     return;
                 }
                 else {
@@ -296,7 +297,7 @@ module.exports = function (io) {
                                 question.alternatives[i].answers.splice(j, 1);
                             }
                         }
-                        
+
                         // input the new answer
                         if (question.alternatives[i]._id.equals(data.selectedAnswer)) {
                             question.alternatives[i].answers.push(currentUser);
@@ -305,11 +306,11 @@ module.exports = function (io) {
                     }
 
                     quiz.save(function (err) {
-                        
+
                     });
                 }
             });
-            
+
         });
 
 
@@ -396,10 +397,10 @@ function getClientActiveQuestion(quiz) {
             });
 
             return q;
-        
+
         }
     };
-        
+
     console.log(">>>> Could not find active question!!!: " +
     quiz.activeQuestionId);
 

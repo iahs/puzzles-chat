@@ -4,7 +4,7 @@ block content
     #client-dashboard(ng-controller='ClientDashboardController')
         .col-md-9(ng-show='question')
             .well
-                h3 Question: 
+                h3 Question:
                 h4 {{ question.question }}
                 form(name='question', ng-submit='submitAnswer()')
                     div.q-opt.span4(ng-repeat='alternative in question.alternatives')
@@ -12,4 +12,3 @@ block content
                         {{ alternative.name }}
                     br
                     button.btn.btn-primary(type="submit") Submit
-
