@@ -23,10 +23,12 @@ app.controller('ClientDashboardController', function ($scope, $window, socket, $
     socket.on('client:questionActivated', function (question) {
         $scope.question = question;
         $timeout(function () {$(':radio').radio();});
+        $(".well").animateHighlight("#52854C", 1000);
     });
     socket.on('client:questionDeactivated', function () {
         $scope.submitAnswer(); // Send answer if selected but not submitted to prevent data loss
         $scope.question = {};
+        $(".well").animateHighlight("#A51C30", 1000);
     });
 
     $scope.chooseAnswer = function (id) { // This should be in a directive, but that's overkill

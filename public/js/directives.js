@@ -71,42 +71,16 @@ app.directive('chatroom', function () {
                 $scope.chatEnabled = status;
             });
 
-        }
-    }
-});
-
-angular.module('nodePuzzles').directive('student-box', function () {
-    return {
-        restrict: 'E',
-        templateUrl: 'templates/student-box.html',
-        scope: {},
-        controller: function ($scope, $element, $attrs, socket, $location) {
-
-            // Send answer to current question
-            $scope.sendAnswer = function() {
-
-                // Should send response to answer as a response
-                socket.emit('studentclient:question', $scope.question);
-
-            };
-
-            // Receive a question (just override previous one)
-            socket.on('server:question', function(question) {
-                console.log('received: ' + question)
-
-                // XXX: Should we auto-submit previous answer when new
-                // question is assigned?
-                $scope.question = question;
+            socket.on('admin:privacyStatusUpdated', function (status) {
+                $scope.privacy = status;
             });
 
         }
     }
 });
 
-
 /**
  * Directive to display modal for adding new questions
- * Not finished yet
  */
 app.directive('questionResults', function () {
     return {
@@ -142,7 +116,6 @@ app.directive('questionResults', function () {
 
 /**
  * Directive to display modal for adding new questions
- * Not finished yet
  */
 app.directive('addquestionmodal', function () {
     return {
@@ -178,7 +151,6 @@ app.directive("mathjaxBind", function() {
     };
 });
 
-// TODO: this would make a nice directive
 app.directive('flashMessages', function () {
     return {
         restrict: "E",
@@ -187,7 +159,7 @@ app.directive('flashMessages', function () {
             $scope.flash = [];
             // A message should be on the format { type: 'info|danger|warning|success', message: 'message to display'}
             socket.on('flash:message', function (message) {
-                $scope.flash.push(message)
+                $scope.flash = [message];
             });
 
             $scope.removeMessage = function(message) {

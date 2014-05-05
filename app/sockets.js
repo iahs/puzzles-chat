@@ -136,6 +136,22 @@ module.exports = function (io) {
                 io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
             });
         });
+        
+        socket.on('admin:setQuizPrivacy', function (status) {
+
+            quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
+                
+                
+                quiz.isPrivate = !quiz.isPrivate;
+                quiz.save();
+                io.sockets.in(roomName(permalink,
+                'chat')).emit('admin:privacyStatusUpdated', quiz.isPrivate);
+            });
+        });
 
         socket.on('admin:activateQuestion', function (question) {
             // Mongo update does not work
@@ -274,8 +290,10 @@ module.exports = function (io) {
                 queryObj["questions." + qid + ".alternatives._id"] = data.selectedAnswer;
                 updateObj.$push["questions." + qid + ".alternatives.$.answers"] = {owner: currentUserId};
 
-                Quiz.update(queryObj, updateObj).exec(function (err) {
+
+                Quiz.update(queryObj, updateObj, function (err) {
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:answer', question._id, data.selectedAnswer, {created: new Date(), owner: currentUserId})
+                    socket.emit('flash:message', {type: 'success', message: "Answer received"})
                 });
             });
         });
