@@ -36,7 +36,7 @@ block content
                         th Answers
                 tbody
                     tr(ng-repeat="alt in visibleQuestion.alternatives")
-                        td {{ alt.name }}
+                        td(mathjax-bind="alt.name")
                         td.ng-hide(ng-show="showAnswers") {{ alt.isCorrect }}
                         td(ng-hide="showAnswers") *****
                         td {{ alt.answers.length }}
