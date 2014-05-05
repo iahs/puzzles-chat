@@ -72,7 +72,7 @@ module.exports = function (io) {
                 socket.join(permalink);
 
                 quizQuery(permalink).exec(function (err, quiz) {
-                    socket.emit( 'client:initdata', getClientActiveQuestion(quiz));
+                    socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
                 });
 
             };

@@ -14,9 +14,9 @@ app.controller('ClientDashboardController', function ($scope, $window, socket) {
     $scope.question = {};
 
     // receive the question
-    socket.on('client:initdata', function (question) {
+    socket.on('client:initdata', function (name, question) {
         $scope.question = question;
-        console.log(question);
+        $scope.quizName = name;
     });
 
     socket.on('client:questionActivated', function (question) {

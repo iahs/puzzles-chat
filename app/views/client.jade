@@ -3,6 +3,7 @@ extends layout
 block content
     #client-dashboard(ng-controller='ClientDashboardController')
         .col-md-9
+            h2  {{ quizName }}
             .well
                 #question(ng-show='question.question')
                     h4 {{ question.question }}
