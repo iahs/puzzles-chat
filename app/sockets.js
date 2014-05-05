@@ -60,6 +60,16 @@ module.exports = function (io) {
                 quizQuery(permalink).exec(function (err, quiz) {
                     socket.emit( 'admin:initdata', quiz );
                 });
+            } else {
+
+                // for a student client, should join room and then 
+                // send over the active question from the DB
+                socket.join(permalink);
+
+                quizQuery(permalink).exec(function (err, quiz) {
+                    socket.emit( 'client:initdata', getClientActiveQuestion(quiz));
+                });
+                
             };
 
             // Join the room
@@ -102,17 +112,7 @@ module.exports = function (io) {
             data.isOwn = true;
             socket.emit('chat:topic', data);
         });
-
-        socket.on('studentclient:question', function(data) {
-            socket.broadcast.to(currentRoom.name).emit('server:question' data);
-
-        }
     
-        // XXX: add adminclient:question here
-        // socket.on('adminclient:question', function (data) {
-        //      socket.broadcast.to(currentRoom.name).emit('server:question',
-        //      data)
-        // }
         /***************************
          * Charts
          ***************************/
@@ -141,9 +141,17 @@ module.exports = function (io) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
                 io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
+
+                // Send simple version to client
+                var alternatives = getClientActiveQuestion(quiz);
+
+                io.sockets.in(permalink).emit('client:questionActivated', alternatives);
+
             });
 
             // TODO: send some message to the chat directive
+
+            
         });
 
         socket.on('admin:deactivateQuestion', function () {
@@ -199,4 +207,47 @@ module.exports = function (io) {
 function quizQuery(permalink) {
     return Quiz.findOne({ permalink: permalink });
 };
+
+/* * * * * * * * * *
+* @brief: get active question for client from a quiz
+*
+* @param[in]: quiz
+*
+* @return active question object
+* * * * * * * * * */
+function getClientActiveQuestion(quiz) {
+
+    console.log(">>>> Getting Client question");
+
+    if (!quiz.activeQuestionId) {
+        console.log(">>>> NO active question!!!");
+        return {};
+    }
+
+    // find the active question
+    for (var i = 0; i < quiz.questions.length; ++i) {
+        var question = quiz.questions[i];
+        if ((question._id).toString() === (quiz.activeQuestionId).toString()) {
+
+            // Send simple version to client
+            var q = { question:question.question, alternatives:[], questionId: question._id, selectedAnswer: "" };
+
+            question.alternatives.forEach(function (d) {
+                console.log(">>>>>>" + d.name);
+                q.alternatives.push({name: d.name});
+            });
+
+            return q;
+        
+        }
+    };
+        
+    console.log(">>>> Could not find active question!!!: " +
+    quiz.activeQuestionId);
+
+    return {};
+
+
+}
+
 

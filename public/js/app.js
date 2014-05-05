@@ -1,8 +1,6 @@
 // Define the AngularJS application
 var app = angular.module('nodePuzzles', ['highcharts-ng']);
 
-
-
 // TODO: remove plotcontroller, only for demo purposes
 app.controller('PlotController', function ($scope, socket) {
 

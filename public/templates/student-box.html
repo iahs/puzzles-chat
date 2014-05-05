@@ -2,6 +2,12 @@
 
 <div style="width:800px">
     <div style="overflow:auto; height:247px;" id="student-container">
+
+    <div ng-repeat="alternative in question.alternatives">
+        {{ alternative.name }}
+    </div>
+    <!-- Add the question here -->
+
     </div>
 
     <form role="form" ng-submit="sendAnswer()">
