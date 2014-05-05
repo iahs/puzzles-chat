@@ -6,11 +6,11 @@ block content
             h2  {{ quizName }}
             .well
                 #question(ng-show='question.question')
-                    h4 {{ question.question }}
+                    h4(mathjax-bind="question.question")
                     form(name='question', ng-submit='submitAnswer()')
-                        div.q-opt.span4(ng-repeat='alternative in question.alternatives')
-                            input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')
-                            {{ alternative.name }}
+                        label(ng-repeat="alternative in question.alternatives")
+                            input(type="radio" ng-model="question.selectedAnswer" value="{{ alternative.id }}" name="alternative")
+                            span(mathjax-bind="alternative.name")
                         br
                         button.btn.btn-primary(type="submit") Submit
                 #noquestion(ng-hide='question.question')
