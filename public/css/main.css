@@ -16,6 +16,14 @@
     color: white
 }
 
+
+
+/* Admin Question stuff */
+.q-btn .btn {
+    margin-right: 10px;
+}
+
+/* Client Question stuff */
 .q-opt {
     margin-left: 25px;
     margin-right: 25px;
@@ -24,3 +32,5 @@
 input[type="radio"] {
     margin-right: 10px;
 }
+
+

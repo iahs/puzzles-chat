@@ -19,7 +19,7 @@ block content
                             td= quiz.permalink
                             td= quiz.questions.length
                             td
-                                form(action="/admin/quiz/#{quiz.permalink}/delete/", method="POST")
+                                form(action="/admin/quiz/#{quiz.permalink}/delete/", method="POST", class="q-btn")
                                     a.btn.btn-sm.btn-info(href="/quiz/#{quiz.permalink}") View
                                     a.btn.btn-sm.btn-primary(href="/admin/quiz/#{quiz.permalink}") Manage
                                     button.btn.btn-sm.btn-danger(type="submit") Delete
