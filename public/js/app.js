@@ -57,8 +57,17 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
 
     socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;
-        $scope.visibleQuestion = $scope.quiz.questions[0] || {};
-        setPlotAnswers($scope.visibleQuestion);
+        if($scope.quiz.activeQuestionId){
+            $scope.quiz.questions.forEach(function (question) {
+                if(question._id == $scope.quiz.activeQuestionId) {
+                    $scope.visibleQuestion = question;
+                    setPlotAnswers($scope.visibleQuestion);
+                }
+            });
+        } else if ($scope.quiz.questions.length) {
+            $scope.visibleQuestion = $scope.quiz.questions[0];
+            setPlotAnswers($scope.visibleQuestion);
+        }
     });
 
     // Hide the solutions to the questions
