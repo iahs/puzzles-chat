@@ -15,6 +15,9 @@
     "express-session": "~1.0.3",
     "cookie-parser": "~1.0.1",
     "socket.io": "~0.9.16",
-    "bcrypt-nodejs": "0.0.3"
+    "bcrypt-nodejs": "0.0.3",
+    "passport.socketio": "~3.0.1",
+    "connect-mongo-store": "~0.1.8",
+    "connect": "~2.14.5"
   }
 }

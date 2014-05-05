@@ -1,9 +1,10 @@
+var app = angular.module('nodePuzzles');
 /**
  * Simple directive to display a chatroom. For now, one global chatroom
  * that all clients connect to.
  * usage: add <chatroom></chatroom> in the html file
  */
-angular.module('nodePuzzles').directive('chatroom', function () {
+app.directive('chatroom', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/chatroom.html',
@@ -11,7 +12,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
         controller: function ($scope, $element, $attrs, socket, $location, $anchorScroll, $timeout) {
             // Tell the server that the chat is ready
             // Otherwise, socket may send info before directive is ready
-            socket.emit('chat:init');
+            socket.emit('chatclient:init');
 
             $scope.newMessage = {sender: "Anonymous"};
             $scope.newTopic = {sender: "Anonymous", title:""};
@@ -19,7 +20,6 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             // Send a new message
             $scope.sendMessage = function() {
                 if ($scope.newMessage.title != "") {
-                    console.log('sending message')
                     $scope.newMessage.topic = $scope.activeTopic;
                     socket.emit('chatclient:message', $scope.newMessage);
                     $scope.newMessage.title = "";
@@ -40,8 +40,7 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             }
 
             // Receive a message
-            socket.on('chat:message', function(message) {
-                console.log('received: ' + message)
+            socket.on('chatserver:message', function(message) {
                 // Save scroll position to avoid moving off active topic
                 var scroll = $('#chat-container').scrollTop() - $('#topic-' + message.topic).height();
                 $scope.topics[message.topic].messages.push(message);
@@ -51,19 +50,25 @@ angular.module('nodePuzzles').directive('chatroom', function () {
             });
 
             // Receive a topic
-            socket.on('chat:topic', function(topic) {
+            socket.on('chatserver:topic', function(topic) {
                 $scope.topics.push(topic);
-                if(topic.isOwn) {
-                    $scope.chooseTopic(topic.index);
-                    // Scroll to new topic
-                    $location.hash('topic-' + topic.index);
-                    $anchorScroll();
-                }
+            });
+
+            // Scroll to own new topic
+            socket.on('chatserver:selectTopic', function(index) {
+                $scope.chooseTopic(index);
+                $location.hash('topic-' + index);
+                $anchorScroll();
             });
 
             // Sync topics
-            socket.on('chat:roomStatus', function(data){
+            socket.on('chatserver:roomStatus', function(data){
                 $scope.topics=data;
+            });
+
+            // Chat enable/disable
+            socket.on('admin:chatStatusUpdated', function(status){
+                $scope.chatEnabled = status;
             });
 
         }
@@ -79,16 +84,16 @@ angular.module('nodePuzzles').directive('student-box', function () {
 
             // Send answer to current question
             $scope.sendAnswer = function() {
-            
+
                 // Should send response to answer as a response
                 socket.emit('studentclient:question', $scope.question);
-                
+
             };
 
             // Receive a question (just override previous one)
             socket.on('server:question', function(question) {
                 console.log('received: ' + question)
-                
+
                 // XXX: Should we auto-submit previous answer when new
                 // question is assigned?
                 $scope.question = question;
@@ -103,7 +108,7 @@ angular.module('nodePuzzles').directive('student-box', function () {
  * Directive to display modal for adding new questions
  * Not finished yet
  */
-angular.module('nodePuzzles').directive('questionResults', function () {
+app.directive('questionResults', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/question_results.html',
@@ -139,7 +144,7 @@ angular.module('nodePuzzles').directive('questionResults', function () {
  * Directive to display modal for adding new questions
  * Not finished yet
  */
-angular.module('nodePuzzles').directive('addquestionmodal', function () {
+app.directive('addquestionmodal', function () {
     return {
         restrict: 'E',
         templateUrl: '/templates/addquestion_modal.html',
@@ -147,5 +152,21 @@ angular.module('nodePuzzles').directive('addquestionmodal', function () {
         controller: function ($scope) {
 
         }
+    };
+});
+
+/**
+ * Directive to render math for data that is manipulated by Angular
+ * This will not be rendered as math if just displayed normally.
+ */
+app.directive("mathjaxBind", function() {
+    return {
+        restrict: "A",
+        controller: ["$scope", "$element", "$attrs", function($scope, $element, $attrs) {
+            $scope.$watch($attrs.mathjaxBind, function(value) {
+                $element.text(value == undefined ? "" : value);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, $element[0]]);
+            });
+        }]
     };
 });

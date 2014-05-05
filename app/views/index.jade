@@ -1,12 +1,16 @@
 extends layout
 
 block content
-    h1  Chat is only defined for quizzes for now
-    p Will not work here any more
-    chatroom
-    quiz
-    responsebox
-    .clearfix(ng-controller='PlotController')
-        highchart#demo-chart(config='chartConfig')
-        button.btn.btn-primary(ng-repeat='type in chartTypes', ng-click='addSeries(type.id)') {{ type.title }}
-    responsebox
+    h1 PuzzleQuizzes
+    p Create your own real-time quizzes, and share them with all you friends. Get live feedback as the submit answers.
+
+    p Register or sign to get started
+    form.well(role="form" action="/login" method="post")
+        .form-group
+            label Email
+            input(type="text", class="form-control", name="email")
+        .form-group
+            label Password
+            input(type="password", class="form-control", name="password")
+        button.btn.btn-primary(type="submit") Login
+        a.btn(href="/signup") Register

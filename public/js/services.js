@@ -4,8 +4,8 @@
  * included in the Angular digest loop
  * and views updated accordingly
  */
-app.factory('socket', function ($rootScope) {
-    var socket = io.connect('http://localhost:3000'); // TODO: move to config file?
+app.factory('socket', function ($rootScope, $window) {
+    var socket = io.connect($window.location.protocol+"//"+$window.location.host);
     return {
         init: function () {
           // Prevent memory leaks in the (unlikely) case of multiple instantiations

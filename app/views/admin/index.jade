@@ -19,14 +19,15 @@ block content
                             td= quiz.permalink
                             td= quiz.questions.length
                             td
-                                a.btn.btn-sm.btn-primary(href="/admin/quiz/#{quiz.permalink}") Manage
+                                form(action="/admin/quiz/#{quiz.permalink}/delete/", method="POST")
+                                    a.btn.btn-sm.btn-primary(href="/admin/quiz/#{quiz.permalink}") Manage
+                                    button.btn.btn-sm.btn-danger(type="submit") Delete
+
             input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
             a.btn.btn-primary(ng-href="/admin/quiz/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new quiz
 
             h2 Recent
             p List of recent quizzes the user has taken
-
-
 
         .col-md-3.well
             h3 Profile
@@ -35,6 +36,3 @@ block content
                 dd= user.id
                 dt Email
                 dd= user.local.email
-                dt Password hash
-                dd= user.local.password
-            a Edit

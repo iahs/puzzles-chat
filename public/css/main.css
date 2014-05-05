@@ -1,7 +1,17 @@
-.active {
+.visible {
     background: #a51c30;
     color: white;
 }
+
+.visible a, .visible a:hover {
+    color: white
+}
+
+.active {
+    background: #52854C;
+    color: white;
+}
+
 .active a, .active a:hover {
     color: white
 }

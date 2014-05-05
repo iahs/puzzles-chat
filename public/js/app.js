@@ -55,8 +55,9 @@ app.controller('PlotController', function ($scope, socket) {
     };
 });
 
-app.controller('NavbarController', function ($scope) {
-    // Navbar on top of page
+app.controller('NavbarController', function ($scope, $window) {
+    $scope.currentPage = $window.location.pathname.substring($window.location.pathname.indexOf('/')+1);
+    console.log($scope.currentPage);
 });
 
 app.controller('AdminDashboardController', function ($scope) {
@@ -97,13 +98,20 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
         var questionUpdated = false;
+
         for (var i=0; i<$scope.quiz.questions.length; i++) {
-            if ($scope.quiz.questions[i]._id === question._id) {
+            if (question._id == $scope.quiz.questions[i]._id) {
                 // Update the object
                 $scope.quiz.questions[i] = question;
+                // Have to update the view if that question is being viewed
+                if ($scope.visibleQuestion._id == question._id) {
+                    $scope.visibleQuestion = $scope.quiz.questions[i];
+                }
+
                 questionUpdated = true;
-            }
-        }
+                break;
+            };
+        };
         if (!questionUpdated)
             $scope.quiz.questions.push(question);
     });
@@ -120,16 +128,27 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.quiz.activeQuestionId = '';
     });
 
-    socket.on('admin:newanswer', function (alternativeId) {
-        for(var i=0; i<$scope.answers.length; i++) {
-            if ($scope.answers[i].id === alternativeId) {
-                console.log($scope.answers[i]);
-                $scope.answers[i].data[0] += 1;
-            }
+
+
+    $scope.newAlternative = {
+        name: '',
+        isCorrect: false,
+        answers: [],
+        submit: function (question) {
+            if (!question || !this.name)
+                return;
+
+            this.permalink = $scope.quiz.permalink;
+            this.questionId = question._id;
+            socket.emit('admin:addAlternative', this);
+            console.log(this);
+
+            // Reset and close window
+            this.name = '';
+            this.isCorrect = false,
+            $('#addAlternative').modal('hide');
         }
-    });
-
-
+    };
 
     // Change the question in view
     $scope.viewQuestion = function(question) {
@@ -173,8 +192,22 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             };
         },
         submit: function () {
-            console.log(JSON.stringify(this));
             socket.emit('admin:addQuestion', this);
+            this.alternatives = [];
+            this.name = '';
+            this.question = '';
+            $('#addQuestion').modal('hide');
+        }
+    };
+
+    $scope.newGroup = {
+        permalink: "",
+        add: function () {
+            if (this.permalink) {
+                socket.emit("admin:addGroup", this.permalink)
+                this.permalink = "";
+                $('#addGroup').modal('hide');
+            };
         }
     };
 
@@ -192,5 +225,49 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         viewResponses: function() {alert("View responses")},
         addAdmin: function() {alert("Add admin")}
     };
+});
+
+app.controller('AdminDetailsController', function ($scope, socket) {
+    socket.emit('join_room', { name: 'ogga', admin: true }); // Todo: use actual permalink
+
+    socket.on('admin:initdata', function (quiz) {
+        $scope.quiz = quiz;
+    });
+
+    // table sorting
+    $scope.reverseSort = true;
+    $scope.setSortBy = function (string) {
+        if ($scope.sortBy == string) {
+            $scope.reverseSort = !$scope.reverseSort;
+        } else {
+            $scope.sortBy = string;
+        }
+    }
+});
+
+app.controller('AdminGroupController', function ($scope, $window, socket) {
+    var groupPermalink = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
+
+    $scope.group = {};
+    socket.emit('admin:manage_group', groupPermalink);
+
+    socket.on('admin:groupData', function (group) {
+        $scope.group = group;
+        $scope.group.emailString = "";
+        console.log(JSON.stringify(group))
+    });
+
+    $scope.addMembers = function () {
+        if (!$scope.group.emailString) return;
+        socket.emit('admin:group:addMembers', $scope.group);
+        $scope.group.emailString = "";
+    };
+
+    $scope.removeMember = function (member) {
+        socket.emit('admin:group:removeMember', {permalink: groupPermalink, email: member} );
+    };
+});
+
+app.controller('AdminGroupsController', function ($scope) {
 
 });
