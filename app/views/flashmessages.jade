@@ -1,5 +1,0 @@
-#flash(ng-controller="FlashMessagesController")
-    .alert(ng-repeat="message in flash", class="alert-{{message.type}}")
-        {{ message.message }}
-        button(ng-click="removeMessage(message)", type="button" class="close" aria-hidden="true") &times;
-
