@@ -250,7 +250,7 @@ module.exports = function (io) {
             // update the answer and send it to the admin
             quizQuery(permalink).exec(function (err, quiz) {
                 // if question is no longer the active question, do not update
-                if (data.questionId != quiz.activeQuestionId || err) {
+                if (!quiz || data.questionId != quiz.activeQuestionId || err) {
                     return;
                 }
 
@@ -274,6 +274,8 @@ module.exports = function (io) {
                 updateObj.$push["questions." + qid + ".alternatives.$.answers"] = {owner: currentUserId};
 
                  Quiz.update(queryObj, updateObj).exec();
+
+                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:answer', question._id, data.selectedAnswer, {created: new Date(), owner: currentUserId})
             });
 
         });

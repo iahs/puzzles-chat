@@ -57,7 +57,6 @@ app.controller('PlotController', function ($scope, socket) {
 
 app.controller('NavbarController', function ($scope, $window) {
     $scope.currentPage = $window.location.pathname.substring($window.location.pathname.indexOf('/')+1);
-    console.log($scope.currentPage);
 });
 
 app.controller('AdminDashboardController', function ($scope) {
@@ -149,7 +148,15 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.quiz.activeQuestionId = '';
     });
 
-
+    socket.on('admin:answer', function (id, selection, answer) {
+        if(id == $scope.visibleQuestion._id) {
+            $scope.visibleQuestion.alternatives.forEach(function (alt) {
+                if(alt._id == selection) {
+                    alt.answers.push(answer);
+                }
+            });
+        }
+    });
 
     $scope.newAlternative = {
         name: '',
@@ -174,21 +181,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Change the question in view
     $scope.viewQuestion = function(question) {
         $scope.visibleQuestion = question;
-
-        // TODO: change this into using the question data when we get data for questions
-        var newAnswers = [
-            { data: [5], name: "Alt. 1", id: 1 },
-            { data: [6], name: "Alt. 2", id: 2 },
-            { data: [12], name: "Alt. 3", id: 3 },
-            { data: [1], name: "Alt. 4", id: 4 }
-        ];
-        // Remove the existing data
-        while ($scope.answers.length > 0 )
-            $scope.answers.pop();
-        // And fill in new data
-        for (var i=0; i<newAnswers.length; i++) {
-            $scope.answers.push(newAnswers[i]);
-        };
+        $scope.answers = $scope.visibleQuestion.answers;
     };
 
     // TODO: remove this when real functionality for updating graph is in place
@@ -275,7 +268,6 @@ app.controller('AdminGroupController', function ($scope, $window, socket) {
     socket.on('admin:groupData', function (group) {
         $scope.group = group;
         $scope.group.emailString = "";
-        console.log(JSON.stringify(group))
     });
 
     $scope.addMembers = function () {
