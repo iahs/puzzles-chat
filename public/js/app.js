@@ -38,7 +38,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     var extractAnswersForPlot = function (question) {
         // { data: [5], name: "Alt. 1", id: 1 },
         var plotAnswers = [];
-        
+
         question.alternatives.forEach(function (alternative) {
             plotAnswers.push({
                data: [alternative.answers.length],
@@ -119,12 +119,23 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     });
 
     socket.on('admin:answer', function (id, selection, answer) {
+        $scope.quiz.questions.forEach(function (question) {
+            if(id == question._id) {
+                question.alternatives.forEach(function (alt) {
+                    if(alt._id == selection) {
+                        alt.answers.push(answer);
+                    }
+                });
+            }
+        });
         if(id == $scope.visibleQuestion._id) {
             $scope.visibleQuestion.alternatives.forEach(function (alt) {
                 if(alt._id == selection) {
                     alt.answers.push(answer);
                 }
             });
+            //TODO: this redraws the whole graph
+            setPlotAnswers($scope.visibleQuestion);
         }
     });
 

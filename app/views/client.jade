@@ -8,10 +8,10 @@ block content
                 #question(ng-show='question.question')
                     h4(mathjax-bind="question.question")
                     label(ng-repeat="alternative in question.alternatives"  class="radio" ng-click="chooseAnswer(alternative.id)")
-                        input(type="radio" name="alternative" )
+                        input(type="radio" name="alternative" ng-disabled='question.submitted')
                         span(mathjax-bind="alternative.name")
                     br
-                    button.btn.btn-primary(ng-click='submitAnswer()' ) Submit
+                    button.btn.btn-primary(ng-click='submitAnswer()' ng-disabled='question.submitted') Submit
                 #noquestion(ng-hide='question.question')
                     h4 No active question right now - hang tight!
         .col-lg-4
