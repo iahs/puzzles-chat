@@ -95,6 +95,11 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.visibleQuestion = $scope.quiz.questions[0] || {};
     });
 
+    $scope.showAnswers = false;
+    $scope.toggleAnswers = function () {
+        $scope.showAnswers = !$scope.showAnswers;
+    };
+
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
         var questionUpdated = false;

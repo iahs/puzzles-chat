@@ -28,9 +28,21 @@ block content
 
             p(mathjax-bind="visibleQuestion.question")
             h4 Alternatives
-            ul
-                li(ng-repeat="alt in visibleQuestion.alternatives") {{alt.name}} ({{alt.answers.length}})
-            button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addAlternative') Add alternative
+            table.table
+                thead
+                    tr
+                        th Alternative
+                        th IsCorrect
+                        th Answers
+                tbody
+                    tr(ng-repeat="alt in visibleQuestion.alternatives")
+                        td {{ alt.name }}
+                        td.ng-hide(ng-show="showAnswers") {{ alt.isCorrect }}
+                        td(ng-hide="showAnswers") *****
+                        td {{ alt.answers.length }}
+
+            button.btn.btn-primary(data-toggle='modal', data-target='#addAlternative') Add alternative
+            button.btn(ng-click="toggleAnswers()") Toggle answers
 
             question-results(answers="answers")
             button.btn(ng-click="plusOne()") Click me
