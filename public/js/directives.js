@@ -163,6 +163,13 @@ app.directive("mathjaxBind", function() {
     return {
         restrict: "A",
         controller: ["$scope", "$element", "$attrs", function($scope, $element, $attrs) {
+            MathJax.Hub.Config({
+              tex2jax: {
+                inlineMath: [ ['$$','$$'], ['\\(','\\)'] ],
+                displayMath: [ ['$$$','$$$'], ['\\[','\\]'] ],
+                processEscapes: false
+              }
+            });
             $scope.$watch($attrs.mathjaxBind, function(value) {
                 $element.text(value == undefined ? "" : value);
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, $element[0]]);
