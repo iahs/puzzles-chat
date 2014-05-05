@@ -1,18 +1,26 @@
 extends ../layout
 
 block content
-    #admin-details(ng-controller="AdminDetailsController")
-        h1 {{ quiz.name }}
-        .table-responsive
-            table.table
-                thead
+    h1 Details for #{quiz.name}
+    h5 Description
+    p= quiz.description
+    h2 Questions
+    - each question in quiz.questions
+        h3= question.name
+        p= question.description
+        table.table.table-striped
+            thead
+                tr
+                    th Time submitted
+                    th User
+                    th Alternative chosen
+                    th Is correct?
+            tbody
+                -each answer in question.answers
                     tr
-                        th(ng-click="setSortBy('name')") Name
-                        th Question
-                        th Answers
-                tbody
-                    tr(ng-repeat="question in quiz.questions | orderBy:sortBy:reverseSort   ")
-                        td {{ question.name }}
-                        td {{ question.question }}
+                        td= answer.created
+                        td= answer.owner
+                        td= answer.answer
+                        td= answer.isCorrect
 
 

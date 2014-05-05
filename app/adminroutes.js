@@ -36,10 +36,18 @@ module.exports = function(app) {
         Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
             if (quiz) {
                 quiz.questions.forEach(function (q) {
-                    q.answerCount = 0;
-                    q.alternatives.forEach(function (a) {
-                        q.answerCount += a.answers.length;
+                    q.answers = [];
+                    q.alternatives.forEach(function (alt) {
+                        alt.answers.forEach(function (ans) {
+                            ans.isCorrect = alt.isCorrect;
+                            ans.answer = alt.name;
+                            q.answers.push(ans);
+                        });
                     });
+                    q.answers.sort(function (a,b) {
+                        return a<b;
+                    });
+
                 });
 
                 // TODO: add authentication here to check that user is admin for quiz
@@ -129,10 +137,6 @@ module.exports = function(app) {
             res.redirect('/admin/groups');
         });
     });
-
-
-
-
 
     // Editing and updating is done over sockets
 };
