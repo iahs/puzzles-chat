@@ -170,3 +170,23 @@ app.directive("mathjaxBind", function() {
         }]
     };
 });
+
+// TODO: this would make a nice directive
+app.directive('flashMessages', function () {
+    return {
+        restrict: "E",
+        scope: {},
+        controller: function ($scope, socket) {
+            $scope.flash = [];
+            // A message should be on the format { type: 'info|danger|warning|success', message: 'message to display'}
+            socket.on('flash:message', function (message) {
+                $scope.flash.push(message)
+            });
+
+            $scope.removeMessage = function(message) {
+                $scope.flash.splice($scope.flash.indexOf(message), 1);
+            };
+        },
+        templateUrl: '/templates/flashmessages.html'
+    }
+});

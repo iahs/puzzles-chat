@@ -95,6 +95,11 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.visibleQuestion = $scope.quiz.questions[0] || {};
     });
 
+    $scope.showAnswers = false;
+    $scope.toggleAnswers = function () {
+        $scope.showAnswers = !$scope.showAnswers;
+    };
+
     // Easier to replace the question than targeting specific values, and only one function necessary
     socket.on('admin:questionChange', function (question) {
         var questionUpdated = false;
@@ -114,6 +119,22 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         };
         if (!questionUpdated)
             $scope.quiz.questions.push(question);
+    });
+
+    // Same method as questionChange
+    socket.on('admin:groupChange', function (group) {
+        var groupUpdated = false;
+
+        for (var i=0; i<$scope.quiz.groups.length; i++) {
+            if (group._id == $scope.quiz.groups[i]._id) {
+                // Update the object
+                $scope.quiz.groups[i] = group;
+                groupUpdated = true;
+                break;
+            };
+        };
+        if (!groupUpdated)
+            $scope.quiz.groups.push(group);
     });
 
     socket.on('admin:chatStatusUpdated', function (status) {

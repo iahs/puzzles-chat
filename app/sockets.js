@@ -127,6 +127,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
 
                 if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
                 };
 
@@ -138,19 +139,19 @@ module.exports = function (io) {
         });
 
         socket.on('admin:activateQuestion', function (question) {
-
             // Mongo update does not work
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
-                io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
 
                 // Send simple version to client
                 var alternatives = getClientActiveQuestion(quiz);
-
-                io.sockets.in(permalink).emit('client:questionActivated', alternatives);
-
+                io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
             });
 
             // TODO: send some message to the chat directive
@@ -161,6 +162,10 @@ module.exports = function (io) {
         socket.on('admin:deactivateQuestion', function () {
             // There can only be one active
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.activeQuestionId = null;
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
@@ -173,9 +178,14 @@ module.exports = function (io) {
 
             // TODO: format the question properly before pushing it into the database
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.questions.push(question);
                 quiz.save(function () {
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                    socket.emit('flash:message', {type: 'success', message: 'Question added'});
                 });
             });
         });
@@ -215,15 +225,29 @@ module.exports = function (io) {
         socket.on('admin:addGroup', function (groupPermalink) {
 
             Group.findOne({permalink:groupPermalink}, function (err, group) {
-                if (!group) return;
+                if (!group) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find group " + groupPermalink});
+                };
                 quizQuery(permalink).exec(function (err, quiz) {
-                    quiz.groups.push(group._id);
-                    quiz.save(function (err) {
-                        // Notify client
-                    })
-                })
-            })
-        })
+                    var alreadyAdded = false;
+                    for (var i=0; i<quiz.groups.length; i++) {
+                        if (quiz.groups[i]._id.equals(group._id)) {
+                            alreadyAdded = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyAdded) {
+                        quiz.groups.push(group._id);
+                        quiz.save(function (err) {
+                            io.sockets.in(roomName(permalink, 'admin')).emit('admin:groupChange', group);
+                            socket.emit('flash:message', {type: 'success', message: "Group added"});
+                        });
+                    } else {
+                        socket.emit('flash:message', {type: 'info', message: "Group has already been added to quiz"});
+                    };
+                });
+            });
+        });
 
         socket.on('test:newanswer', function (id) {
             io.sockets.in(roomName(permalink, 'admin')).emit('admin:newanswer', id);
@@ -282,12 +306,12 @@ module.exports = function (io) {
         socket.on('admin:group:addMembers', function (groupData) {
             if (! groupData || !groupData.emailString) return;
             Group.findOne({ permalink: groupData.permalink }, function (err, group) {
-                if (!group) return;
-                console.log('got data to add')
+                if (!group) {
+                    socket.emit('flash:message', {type: 'danger', message: "Could not find group"});
+                };
 
                 // Extract email addresses from a comma-separated string
                 var emails = groupData.emailString.replace(/\s+/g, '').split(',');
-                console.log(emails);
 
                 emails.forEach(function (email) {
                     if (group.members.indexOf(email)<0 && validateEmail(email)) {
