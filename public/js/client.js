@@ -2,7 +2,7 @@
 var app = angular.module('nodePuzzles');
 
 // Client Controller
-app.controller('ClientDashboardController', function ($scope, $window, socket) {
+app.controller('ClientDashboardController', function ($scope, $window, socket, $timeout) {
 
     // Get the room name from url
     var roomName = $window.location.pathname.substring($window.location.pathname.lastIndexOf('/')+1);
@@ -17,10 +17,12 @@ app.controller('ClientDashboardController', function ($scope, $window, socket) {
     socket.on('client:initdata', function (name, question) {
         $scope.question = question;
         $scope.quizName = name;
+        $timeout(function () {$(':radio').radio();}); // Bootstrap hack
     });
 
     socket.on('client:questionActivated', function (question) {
         $scope.question = question;
+        $timeout(function () {$(':radio').radio();});
     });
     socket.on('client:questionDeactivated', function () {
         $scope.submitAnswer(); // Send answer if selected but not submitted to prevent data loss
