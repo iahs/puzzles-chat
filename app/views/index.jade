@@ -4,13 +4,32 @@ block content
     h1 PuzzleQuizzes
     p Create your own real-time quizzes, and share them with all you friends. Get live feedback as the submit answers.
 
-    p Register or sign to get started
-    form.well(role="form" action="/login" method="post")
-        .form-group
-            label Email
-            input(type="text", class="form-control", name="email")
-        .form-group
-            label Password
-            input(type="password", class="form-control", name="password")
-        button.btn.btn-primary(type="submit") Login
-        a.btn(href="/signup") Register
+    - if (!isLoggedIn)
+        p Register or sign to get started
+        form.well(role="form" action="/login" method="post")
+            .form-group
+                label Email
+                input(type="text", class="form-control", name="email")
+            .form-group
+                label Password
+                input(type="password", class="form-control", name="password")
+            button.btn.btn-primary(type="submit") Login
+            a.btn(href="/signup") Register
+
+    - if (isLoggedIn)
+        h2 Active, public quizzes (#{quizzes.length})
+        table.table
+            thead
+                tr
+                    th Name
+                    th Questions
+                    th Link
+            tbody
+                - each quiz in quizzes
+                    tr
+                        td= quiz.name
+                        td= quiz.questions.length
+                        td
+                            a(href="/quiz/#{quiz.permalink}") Go to quiz
+
+
