@@ -25,7 +25,7 @@ block content
                                     button.btn.btn-sm.btn-danger(type="submit") Delete
 
             input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
-            a.btn.btn-primary(ng-href="/admin/quiz/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new quiz
+            a.btn.btn-primary#create-btn(ng-href="/admin/quiz/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new quiz
 
             h2 Recent
             p List of recent quizzes the user has taken

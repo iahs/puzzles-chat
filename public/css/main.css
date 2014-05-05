@@ -27,6 +27,11 @@
     margin-right: 10px;
 }
 
+#create-btn {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* Client Question stuff */
 .q-opt {
     margin-left: 25px;

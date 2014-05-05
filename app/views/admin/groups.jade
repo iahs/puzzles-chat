@@ -22,8 +22,8 @@ block content
                                     a.btn.btn-sm.btn-primary(href="/admin/group/#{group.permalink}") Manage
                                     button.btn.btn-sm.btn-danger(type="submit") Delete
 
-            input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
-            a.btn.btn-primary(ng-href="/admin/group/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new group
+            input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new group")
+            a.btn.btn-primary#create-btn(ng-href="/admin/group/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new group
         .col-md-3.well
             h3 Profile
             dl(style="word-wrap: break-word;")
