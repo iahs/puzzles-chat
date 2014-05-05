@@ -260,40 +260,59 @@ module.exports = function (io) {
 
         socket.on('client:answer', function (data) {
             // update the answer and send it to the admin
+            console.log(JSON.stringify(data));
             console.log(data.selectedAnswer);
             quizQuery(permalink).exec(function (err, quiz) {
                 
+                console.log(JSON.stringify(quiz));
+
                 // if question is no longer the active question, do not update
-                if (!quiz.activeQuestionId.equals(quiz.questionId)) {
-                    
+                if (!(data.questionId == quiz.activeQuestionId)) {
+                    console.log("It is not equal"); 
+                    return;
                 }
+                else {
 
-                // loop through the alternatives to update the selected answer
-                // loop does two things:
-                //     1) save the new answer
-                //     2) remove the previously saved answer
-                for (var i = 0; i < question.alternatives.length; ++i) {
-
-                    // loop through the answers and remove the answer if it
-                    // already exists
-                    for (var j = 0; j < quiz.alternatives[i].answers.length; ++j) {
-
-                        // remove it if the answer already exists
-                        if (question.alternatives[i].answers[j] == currentUser) {
-                            question.alternatives[i].answers.splice(j, 1);
+                    var question = null;
+                    // find the active question
+                    for (var i = 0; i < quiz.questions.length; ++i) {
+                        if (quiz.questions[i]._id.equals(quiz.activeQuestionId)) {
+                            question = quiz.questions[i];
                         }
-                    }
-                    
-                    // input the new answer
-                    if (question.alternatives[i]._id.equals(data.selectedAnswer)) {
-                        question.alternatives[i].answers.push(currentUser);
+                    };
+
+                    if (!question) {
+                        // XXX: Debug, question does not exist
+                        return;
                     }
 
+                    // loop through the alternatives to update the selected answer
+                    // loop does two things:
+                    //     1) save the new answer
+                    //     2) remove the previously saved answer
+                    for (var i = 0; i < question.alternatives.length; ++i) {
+
+                        // loop through the answers and remove the answer if it
+                        // already exists
+                        for (var j = 0; j < question.alternatives[i].answers.length; ++j) {
+
+                            // remove it if the answer already exists
+                            if (question.alternatives[i].answers[j] == currentUser) {
+                                question.alternatives[i].answers.splice(j, 1);
+                            }
+                        }
+                        
+                        // input the new answer
+                        if (question.alternatives[i]._id.equals(data.selectedAnswer)) {
+                            question.alternatives[i].answers.push(currentUser);
+                        }
+
+                    }
+
+                    quiz.save(function (err) {
+                        
+                    });
                 }
-
-                quiz.save(function (err) {
-                    
-                });
             });
             
         });
