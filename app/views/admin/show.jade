@@ -5,8 +5,8 @@ block content
         .col-lg-2
             ul.list-group
                 h3.list-group-item-heading Questions
-                li.list-group-item(ng-repeat="question in quiz.questions", ng-class="{active: question._id===quiz.activeQuestionId, visible: question===visibleQuestion}")
-                    a(ng-click="viewQuestion(question)") {{ question.name }}
+                li.list-group-item(ng-repeat="question in quiz.questions", ng-click="viewQuestion(question)", ng-class="{active: question._id===quiz.activeQuestionId, visible: question===visibleQuestion}")
+                    a {{ question.name }}
             button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#addQuestion') Add question
             ul.list-group
                 h3.list-group-item-heading Groups
@@ -67,8 +67,8 @@ block content
                             legend Alternatives
                             .form-group(ng-repeat="alt in newQuestion.alternatives")
                                 input.form-control(ng-model="alt.name", placeholder="Enter value here", required)
-                                label(class="checkbox")
-                                    input(type="checkbox" ng-model="alt.isCorrect")
+                                label(class="")
+                                    input(type="checkbox", ng-model="alt.isCorrect")
                                     | Is correct
                                 button.btn.btn-danger.btn-sm(ng-click="newQuestion.removeAlternative(alt)") Remove
                             button.btn(type="button", ng-click="newQuestion.addAlternative()") Add alternative
@@ -89,8 +89,8 @@ block content
                                 label(for="newAlternativeName") Alternative
                                 input#newAlternativeName.form-control(ng-model="newAlternative.name", name="newAlternativeName", placeholder="Enter value here", required)
                             .form-group
-                                label(class="checkbox")
-                                    input(type="checkbox" ng-model="newAlternative.isCorrect")
+                                label(class="")
+                                    input(type="checkbox", ng-model="newAlternative.isCorrect")
                                     | Is correct
                             .modal-footer
                                 button.btn.btn-default(type='button', data-dismiss='modal') Close

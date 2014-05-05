@@ -134,7 +134,6 @@ module.exports = function (io) {
                 quiz.chatIsActive = isActive;
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
-                // TODO: send some message to the chat directive
             });
         });
 
@@ -153,10 +152,6 @@ module.exports = function (io) {
                 var alternatives = getClientActiveQuestion(quiz);
                 io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
             });
-
-            // TODO: send some message to the chat directive
-
-            
         });
 
         socket.on('admin:deactivateQuestion', function () {
@@ -191,32 +186,32 @@ module.exports = function (io) {
         });
 
         /**
-         * TODO: not implemented
+         * We have decided that questions can't be deleted from quizzes.
+         * This is just a reference in case we change our minds later
          */
-        socket.on('admin:removeQuestion', function (questionId) {
-
-
-        });
+        socket.on('admin:removeQuestion', function (questionId) { });
 
         /**
-         * TODO: not implemented
-         * alternative has the property questionId
+         * Add a new alternative to an existing question
+         * The alternative argument has the property questionId
          */
         socket.on('admin:addAlternative', function (alternative) {
+            console.log("Alternative added!")
+            console.log(alternative);
             quizQuery(permalink).exec(function (err, quiz) {
-                if (!quiz) return;
+                if (!quiz) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find quiz " + permalink});
+                    return;
+                };
                 var updatedQuestion;
                 for (var i=0; i<quiz.questions.length; i++) {
                     if (quiz.questions[i]._id.equals(alternative.questionId)) {
-                        console.log("FOUND MATCH")
                         quiz.questions[i].alternatives.push(alternative);
                         updatedQuestion = quiz.questions[i];
                         break;
                     };
                 };
                 quiz.save(function (err) {
-                    console.log("updated question");
-                    console.log(updatedQuestion);
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
                 });
             });
@@ -431,5 +426,5 @@ function validateEmail(email) {
  * @returns {Boolean|Bool|boolean|Query|*}
  */
 function canEditQuiz(userId, quiz) {
-    return quiz.owner.equals(userId);
+    return quiz && quiz.owner && quiz.owner.equals(userId);
 }
