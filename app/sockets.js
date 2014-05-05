@@ -292,6 +292,8 @@ module.exports = function (io) {
                  Quiz.update(queryObj, updateObj).exec();
 
                  io.sockets.in(roomName(permalink, 'admin')).emit('admin:answer', question._id, data.selectedAnswer, {created: new Date(), owner: currentUserId})
+
+                 socket.emit('flash:message', {type: 'success', message: "Answer received"})
             });
 
         });

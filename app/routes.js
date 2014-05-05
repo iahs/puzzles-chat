@@ -1,7 +1,13 @@
 // app/routes.js
+Quiz = require('./models/quiz');
 module.exports = function(app, passport) {
     app.get('/', function (req, res) {
-        res.render('index');
+
+        Quiz.where('activeQuestionId').ne(null)
+            .where('isPrivate').equals(false)
+            .exec(function (err, quizzes) {
+                res.render('index', { quizzes: quizzes, isLoggedIn: req.isAuthenticated()});
+            });
     });
 
     app.get('/login', function(req, res) {
@@ -15,7 +21,7 @@ module.exports = function(app, passport) {
     }));
 
     app.get('/signup', function(req, res) {
-        res.render('signup');
+        res.render('signup', { message: req.flash('message') });
     });
 
     app.post('/signup', passport.authenticate('local-signup', {
