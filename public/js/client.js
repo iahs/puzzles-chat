@@ -17,8 +17,14 @@ app.controller('ClientDashboardController', function ($scope, $window, socket) {
     socket.on('client:initdata', function (question) {
         $scope.question = question;
         console.log(question);
-    })
-    
+    });
+
+    socket.on('client:questionActivated', function (question) {
+        $scope.question = question;
+
+        console.log("UPDATED: " + question);
+    });
+
     $scope.submitAnswer = function () {
         if (!$scope.question.selectedAnswer) return;
 
