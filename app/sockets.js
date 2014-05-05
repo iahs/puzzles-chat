@@ -107,7 +107,7 @@ module.exports = function (io) {
             if(currentUser)
                 data.sender = currentUser;
             rooms[permalink][data.topic].messages.push(data);
-            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}, function(err, result){ });
+            Quiz.findOneAndUpdate( {permalink: permalink, "topics.index": data.topic}, {$push: {"topics.$.messages": data}}).exec();
             io.sockets.in(roomName(permalink, 'chat')).emit('chatserver:message', data);
         });
 
@@ -117,7 +117,7 @@ module.exports = function (io) {
             if(currentUser)
                 data.sender = currentUser;
             rooms[permalink].push(data);
-            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}, function(err, result){ });
+            Quiz.findOneAndUpdate( {permalink: permalink }, {$push: {topics: data}}).exec();
             io.sockets.in(roomName(permalink, 'chat')).emit('chatserver:topic', data);
             socket.emit('chatserver:selectTopic', data.index); // Make sender select new topic
         });
@@ -274,7 +274,7 @@ module.exports = function (io) {
                 queryObj["questions." + qid + ".alternatives._id"] = data.selectedAnswer;
                 updateObj.$push["questions." + qid + ".alternatives.$.answers"] = currentUserObj;
 
-                 Quiz.update( queryObj, updateObj, function(err, result){ });
+                 Quiz.update( queryObj, updateObj).exec();
             });
 
         });
