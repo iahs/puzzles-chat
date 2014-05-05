@@ -2,9 +2,13 @@ extends layout
 
 block content
     #client-dashboard(ng-controller='ClientDashboardController')
-        .well(ng-hide='question')
-            p no active question
-        h1(ng-repeat='alternative in question.alternatives')
-        | {{ alternative.name }}
-
+        .col-md-9(ng-show='question')
+            .well
+                h3 Question: {{ question.question }}
+                form(name='question', ng-submit='submitAnswer()')
+                    div.span4(ng-repeat='alternative in question.alternatives')
+                        input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')
+                        {{ alternative.name }}
+                    br
+                    button.btn.btn-primary(type="submit") Submit
 

@@ -18,6 +18,14 @@ app.controller('ClientDashboardController', function ($scope, $window, socket) {
         $scope.question = question;
         console.log(question);
     })
+    
+    $scope.submitAnswer = function () {
+        if (!$scope.question.selectedAnswer) return;
+
+        // send the selectedAnswer back
+        socket.emit('client:answer', $scope.question);
+
+    };
 
 });
 
