@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-    #admin(ng-controller="AdminQuizController")
+    #admin(ng-controller="AdminQuizController", ng-show="quiz")
         .col-lg-2
             ul.list-group
                 h3.list-group-item-heading Questions

@@ -88,7 +88,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     $scope.visibleQuestion = {};
 
     // A reference to the quiz object of the page
-    $scope.quiz = {};
+    $scope.quiz = '';
 
     socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;

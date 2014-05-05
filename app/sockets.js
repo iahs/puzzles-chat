@@ -2,7 +2,6 @@ var Quiz = require('./models/quiz'),
     Question = require('./models/question'),
     Group = require('./models/group'),
     User = require('./models/user'),
-    passport = require('passport') || 'ERROR',
     mongoose = require('mongoose') || 'ERROR';
 
 // Distinguish between chat rooms
@@ -33,7 +32,8 @@ module.exports = function (io) {
     io.sockets.on('connection', function(socket) {
         var permalink,
             currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email,
-            currentUserId = socket.handshake.user._id;
+            currentUserId = socket.handshake.user._id,
+            currentUserEmail = socket.handshake.user.local.email
 
         /**
          * Join a room for a specific quiz
@@ -42,7 +42,6 @@ module.exports = function (io) {
          * room = { name: 'string', admin: boolean }
          */
         socket.on('join_room', function (room) {
-            // TODO: Verify that user is authenticated and has access to room
             // Can only be connected to one permalink
             if (permalink) {
                 socket.leave(roomName(permalink, 'chat'));
@@ -56,29 +55,40 @@ module.exports = function (io) {
             // initialize room if not already in use
             if (rooms[permalink] === undefined) {
                 rooms[permalink] = [];
-            }
-
-            // Separate room for admin commands
-            if (room.admin === true) {
-                socket.join(roomName(permalink, 'admin'));
-                // Send admin init data
-                quizQuery(permalink).exec(function (err, quiz) {
-                    socket.emit( 'admin:initdata', quiz );
-                });
-            } else {
-
-                // for a student client, should join room and then
-                // send over the active question from the DB
-                socket.join(permalink);
-
-                quizQuery(permalink).exec(function (err, quiz) {
-                    socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
-                });
-
             };
 
-            // Join the room
-            socket.join(roomName(permalink, 'client'));
+            // Get the quiz object for authorization of users
+            quizQuery(permalink).exec(function (err, quiz) {
+                if (room.admin === true) {
+                    // The user requested admin rights
+                    if (quiz.owner.equals(currentUserId)) {
+                        socket.join(roomName(permalink, 'admin'));
+                        // send admin init data
+                        socket.emit( 'admin:initdata', quiz );
+                    } else {
+                        socket.emit('flash:message', {type: 'danger', message: "You do not have admin permissions for this quiz"});
+                    }
+                } else if (quiz.isPrivate) {
+                    // The user tried to join a private quiz as a client
+                    var hasAccess = false;
+                    for (var i=0; i<quiz.groups.length; i++) {
+                        if (quiz.groups[i].members.indexOf(currentUserEmail) > 0) {
+                            hasAccess = true;
+                            break;
+                        };
+                    }
+                    if (hasAccess) {
+                        socket.join(roomName(permalink, 'client'));
+                        socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
+                    } else {
+                        socket.emit('flash:message', {type: 'danger', message:" This is a private quiz. Please contact the owner for access"});
+                    }
+                } else {
+                    // Quiz is public. Everyone can join
+                    socket.join(roomName(permalink, 'client'));
+                    socket.emit( 'client:initdata', quiz.name, getClientActiveQuestion(quiz));
+                };
+            })
         });
 
         /***************************
@@ -111,21 +121,11 @@ module.exports = function (io) {
             socket.emit('chatserver:selectTopic', data.index); // Make sender select new topic
         });
 
-        /***************************
-         * Charts
-         ***************************/
-         // TODO: remove this. Just for demo purposes
-         socket.on('chartclient:series', function(data) {
-            socket.broadcast.to(roomName(permalink, 'client')).emit('chart:series', data);
-         });
-
-
         socket.on('admin:setChatStatus', function (status) {
             var isActive = !!status;
 
             // Mongo update does not work
             quizQuery(permalink).exec(function (err, quiz) {
-
                 if (!canEditQuiz(currentUserId, quiz)) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
@@ -144,6 +144,7 @@ module.exports = function (io) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
                 };
+
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
@@ -244,15 +245,6 @@ module.exports = function (io) {
                 });
             });
         });
-
-        socket.on('test:newanswer', function (id) {
-            io.sockets.in(roomName(permalink, 'admin')).emit('admin:newanswer', id);
-        });
-
-        socket.on('studentclient:question', function(data) {
-            socket.broadcast.to(roomName(permalink, 'client')).emit('server:question', data);
-        });
-
 
         socket.on('client:answer', function (data) {
             // update the answer and send it to the admin
