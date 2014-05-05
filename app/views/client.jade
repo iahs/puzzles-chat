@@ -1,11 +1,11 @@
 extends layout
 
 block content
-    #client-dashboard(ng-controller='ClientDashboardController', ng-show='question')
+    #client-dashboard(ng-controller='ClientDashboardController', ng-show='quizName')
         .col-sm-8
             h2  {{ quizName }}
             .well
-                #question(ng-show='question.question')
+                #question(ng-show='question')
                     h4 {{question.name}}
                     p(mathjax-bind="question.question")
                     label(ng-repeat="alternative in question.alternatives"  class="radio" ng-click="chooseAnswer(alternative.id)")
@@ -14,7 +14,7 @@ block content
                     br
                     button.btn.btn-primary(ng-click='submitAnswer()' ng-hide='question.submitted') Submit
                     div(ng-show='question.submitted') You've already answered this question
-                #noquestion(ng-hide='question.question')
+                #noquestion(ng-hide='question')
                     h4 No active question right now - hang tight!
                         img.img-responsive(src='/img/forever.png')
         .col-sm-4

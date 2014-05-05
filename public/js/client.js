@@ -21,14 +21,14 @@ app.controller('ClientDashboardController', function ($scope, $window, socket, $
     });
 
     socket.on('client:questionActivated', function (question) {
-        $scope.submitAnswer(); // Send answer if selected but not submitted to prevent data loss
+        if($scope.question) $scope.submitAnswer(); // Send answer if selected but not submitted to prevent data loss
         $scope.question = question;
         $timeout(function () {$(':radio').radio();});
         $(".well").animateHighlight("#52854C", 1000);
     });
     socket.on('client:questionDeactivated', function () {
         $scope.submitAnswer();
-        $scope.question = {};
+        $scope.question = null;
         $(".well").animateHighlight("#A51C30", 1000);
     });
 
