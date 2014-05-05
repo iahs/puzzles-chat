@@ -119,6 +119,10 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         $scope.quiz.chatIsActive = status;
     });
 
+    socket.on('admin:privacyStatusUpdated', function (status) {
+        $scope.quiz.isPrivate = status;
+    });
+
     socket.on('admin:questionActivated', function (question) {
         $scope.quiz.activeQuestionId = question._id;
     });
@@ -208,6 +212,9 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
 
     // Grouping of the actions in the action bar
     $scope.actions = {
+        setQuizPrivacy: function (status) {
+            socket.emit('admin:setQuizPrivacy', !!status)
+        },
         setChatStatus: function (status) {
             socket.emit('admin:setChatStatus', !!status)
         },

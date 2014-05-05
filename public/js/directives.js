@@ -71,6 +71,10 @@ app.directive('chatroom', function () {
                 $scope.chatEnabled = status;
             });
 
+            socket.on('admin:privacyStatusUpdated', function (status) {
+                $scope.privacy = status;
+            });
+
         }
     }
 });

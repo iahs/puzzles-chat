@@ -136,6 +136,22 @@ module.exports = function (io) {
                 io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
             });
         });
+        
+        socket.on('admin:setQuizPrivacy', function (status) {
+
+            quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
+                
+                
+                quiz.isPrivate = !quiz.isPrivate;
+                quiz.save();
+                io.sockets.in(roomName(permalink,
+                'chat')).emit('admin:privacyStatusUpdated', quiz.isPrivate);
+            });
+        });
 
         socket.on('admin:activateQuestion', function (question) {
             // Mongo update does not work
