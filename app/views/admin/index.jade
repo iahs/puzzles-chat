@@ -27,9 +27,6 @@ block content
             input.form-control(ng-model="newQuiz.permalink", placeholder="Identifier for new quiz")
             a.btn.btn-primary#create-btn(ng-href="/admin/quiz/{{newQuiz.permalink}}", ng-disabled="!newQuiz.permalink") Create a new quiz
 
-            h2 Recent
-            p List of recent quizzes the user has taken
-
         .col-md-3.well
             h3 Profile
             dl(style="word-wrap: break-word;")

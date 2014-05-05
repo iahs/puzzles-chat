@@ -11,7 +11,7 @@ app.controller('ClientDashboardController', function ($scope, $window, socket, $
     socket.emit('join_room', { name: roomName });
 
     // A reference to the question the user is currently viewing
-    $scope.question = {};
+    $scope.question = null;
 
     // receive the question
     socket.on('client:initdata', function (name, question) {

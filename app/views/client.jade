@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    #client-dashboard(ng-controller='ClientDashboardController')
+    #client-dashboard(ng-controller='ClientDashboardController', ng-show='question')
         .col-sm-8
             h2  {{ quizName }}
             .well

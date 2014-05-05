@@ -267,6 +267,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 // if question is no longer the active question, do not update
                 if (!quiz || data.questionId != quiz.activeQuestionId || err) {
+                    socket.emit('flash:message', { type: 'warning', message: 'Question has been closed'});
                     return;
                 }
 
@@ -280,22 +281,21 @@ module.exports = function (io) {
                 };
 
                 if (!question) {
-                    // XXX: Debug, question does not exist
+                    socket.emit('flash:message', { type: 'warning', message: 'Question does not exist'});
                     return;
                 }
 
                 var queryObj = {permalink: permalink},
-                 updateObj = {$push: {}};
+                updateObj = {$push: {}};
                 queryObj["questions." + qid + ".alternatives._id"] = data.selectedAnswer;
                 updateObj.$push["questions." + qid + ".alternatives.$.answers"] = {owner: currentUserId};
 
-                 Quiz.update(queryObj, updateObj).exec();
 
-                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:answer', question._id, data.selectedAnswer, {created: new Date(), owner: currentUserId})
-
-                 socket.emit('flash:message', {type: 'success', message: "Answer received"})
+                Quiz.update(queryObj, updateObj, function (err) {
+                    io.sockets.in(roomName(permalink, 'admin')).emit('admin:answer', question._id, data.selectedAnswer, {created: new Date(), owner: currentUserId})
+                    socket.emit('flash:message', {type: 'success', message: "Answer received"})
+                });
             });
-
         });
 
 
