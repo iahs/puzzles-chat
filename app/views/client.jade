@@ -2,7 +2,7 @@ extends layout
 
 block content
     #client-dashboard(ng-controller='ClientDashboardController')
-        .col-md-8
+        .col-sm-8
             h2  {{ quizName }}
             .well
                 #question(ng-show='question.question')
@@ -14,5 +14,5 @@ block content
                     button.btn.btn-primary(ng-click='submitAnswer()' ng-disabled='question.submitted') Submit
                 #noquestion(ng-hide='question.question')
                     h4 No active question right now - hang tight!
-        .col-lg-4
+        .col-sm-4
             chatroom
