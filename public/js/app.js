@@ -43,7 +43,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             plotAnswers.push({
                data: [alternative.answers.length],
                 name: alternative.name,
-                id: alternative.id
+                id: alternative._id
             });
         })
         return plotAnswers;
@@ -129,13 +129,11 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             }
         });
         if(id == $scope.visibleQuestion._id) {
-            $scope.visibleQuestion.alternatives.forEach(function (alt) {
-                if(alt._id == selection) {
-                    alt.answers.push(answer);
+            $scope.plotAnswers.forEach(function (ans){
+                if(ans.id == selection){
+                    ans.data[0]++;
                 }
             });
-            //TODO: this redraws the whole graph
-            setPlotAnswers($scope.visibleQuestion);
         }
     });
 
