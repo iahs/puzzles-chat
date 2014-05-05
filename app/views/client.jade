@@ -4,7 +4,8 @@ block content
     #client-dashboard(ng-controller='ClientDashboardController')
         .col-md-9(ng-show='question')
             .well
-                h3 Question: {{ question.question }}
+                h3 Question: 
+                h4 {{ question.question }}
                 form(name='question', ng-submit='submitAnswer()')
                     div.q-opt.span4(ng-repeat='alternative in question.alternatives')
                         input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')

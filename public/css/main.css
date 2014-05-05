@@ -16,6 +16,11 @@
     color: white
 }
 
+.q-opt {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
 input[type="radio"] {
     margin-right: 10px;
 }
