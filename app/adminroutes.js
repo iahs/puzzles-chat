@@ -32,9 +32,11 @@ module.exports = function(app) {
            };
         });
     });
-    app.get('/admin/quiz/:permalink/details', function (req, res) {
-        Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
-            if (quiz) {
+    app.get('/admin/quiz/:permalink/details', isLoggedIn, function (req, res) {
+        Quiz.findOne({permalink: req.params.permalink})
+            .populate('questions.alternatives.answers.owner')
+            .exec(function(err, quiz) {
+            if (quiz && quiz.owner.equals(req.user._id) ) {
                 quiz.questions.forEach(function (q) {
                     q.answers = [];
                     q.alternatives.forEach(function (alt) {
@@ -47,13 +49,11 @@ module.exports = function(app) {
                     q.answers.sort(function (a,b) {
                         return a<b;
                     });
-
                 });
-
                 // TODO: add authentication here to check that user is admin for quiz
                 res.render('admin/details', {quiz: quiz});
             } else {
-                res.send("Not found");
+                res.send("Not found or access denied");
             };
         });
     });

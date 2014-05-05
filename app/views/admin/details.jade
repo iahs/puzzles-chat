@@ -12,14 +12,16 @@ block content
             thead
                 tr
                     th Time submitted
-                    th User
+                    th Username
+                    th Email
                     th Alternative chosen
                     th Is correct?
             tbody
                 -each answer in question.answers
                     tr
                         td= answer.created
-                        td= answer.owner
+                        td= answer.owner.local.username
+                        td= answer.owner.local.email
                         td= answer.answer
                         td= answer.isCorrect
 

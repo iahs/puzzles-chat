@@ -104,10 +104,9 @@ block content
                     .modal-body
                         form(role="form", ng-submit="newGroup.add()")
                             legend Group
-                            p Only existing groups will be added to the quiz. Please create any new groups before
-                            | you add them to the quiz
+                            p You can only add existing groups
                             .form-group
-                                input.form-control(placeholder="name", ng-model="newGroup.permalink", required)
+                                input.form-control(placeholder="permalink", ng-model="newGroup.permalink", required)
                             .modal-footer
                                 button.btn.btn-default(type='button', data-dismiss='modal') Close
                                 button.btn.btn-primary(type="submit") Add group
