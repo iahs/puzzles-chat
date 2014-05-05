@@ -1,0 +1,10 @@
+extends layout
+
+block content
+    #client-dashboard(ng-controller='ClientDashboardController')
+        .well(ng-hide='question')
+            p no active question
+        h1(ng-repeat='alternative in question.alternatives')
+        | {{ alternative.name }}
+
+

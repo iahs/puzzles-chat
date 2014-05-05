@@ -28,4 +28,9 @@ module.exports = function(app, passport) {
         req.logout();
         res.redirect('/');
     });
+
+    app.get('/quiz/:permalink', function (req, res) {
+        res.render('client');
+
+    });
 };
