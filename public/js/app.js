@@ -1,60 +1,6 @@
 // Define the AngularJS application
 var app = angular.module('nodePuzzles', ['highcharts-ng']);
 
-// TODO: remove plotcontroller, only for demo purposes
-app.controller('PlotController', function ($scope, socket) {
-
-    // Graphing system
-    var chartSeries = [];
-
-    socket.on('chart:series', function(data) {
-        chartSeries.push(data);
-    });
-
-    $scope.chartTypes = [
-        {"id": "line", "title": "Line"},
-        {"id": "spline", "title": "Smooth line"},
-        {"id": "area", "title": "Area"},
-        {"id": "areaspline", "title": "Smooth area"},
-        {"id": "column", "title": "Column"},
-        {"id": "bar", "title": "Bar"},
-        {"id": "pie", "title": "Pie"},
-        {"id": "scatter", "title": "Scatter"}
-    ];
-
-    $scope.addSeries = function (type) {
-        type = type ? type : "line"
-        var data = []
-        for(var i=0; i<20; i++) {
-            data.push(10*Math.random())
-        };
-        socket.emit('chartclient:series', {
-            "name": Math.floor(100*Math.random()),
-            "data": data,
-            "type": type
-        });
-    }
-
-    $scope.chartConfig = {
-        options: {
-            chart: {
-                type: 'areaspline'
-            },
-            plotOptions: {
-                series: {
-                    stacking: ''
-                }
-            }
-        },
-        series: chartSeries,
-        title: {
-            text: 'Highcharts demo'
-        },
-        loading: false,
-        size: {}
-    };
-});
-
 app.controller('NavbarController', function ($scope, $window) {
     $scope.currentPage = $window.location.pathname.substring($window.location.pathname.indexOf('/')+1);
 });
@@ -70,18 +16,38 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Connect to the corresponding room. By specifying admin, will get admin data back
     socket.emit('join_room', { name: roomName, admin: true });
 
-    // Logging for debug
-    socket.on('server:info', function (info) {
-        console.log(info);
-    });
-
     // The array must NOT be replaced. The questionResult directive depends on it for plotting.
-    $scope.answers = [
-        { data: [4], name: "Alt. 1", id: 1 },
-        { data: [3], name: "Alt. 2", id: 2 },
-        { data: [6], name: "Alt. 3", id: 3 },
-        { data: [1], name: "Alt. 4", id: 4 }
-    ];
+    $scope.plotAnswers = [];
+
+
+    /**
+     * Helper method to update the plot data
+     * when the visible question change
+     * @param question
+     */
+    var setPlotAnswers = function (question) {
+        var plotAnswers = extractAnswersForPlot(question);
+        while ($scope.plotAnswers.length > 0 )
+            $scope.plotAnswers.pop();
+        // And fill in new data
+        for (var i=0; i<plotAnswers.length; i++) {
+            $scope.plotAnswers.push(plotAnswers[i]);
+        };
+    };
+
+    var extractAnswersForPlot = function (question) {
+        // { data: [5], name: "Alt. 1", id: 1 },
+        var plotAnswers = [];
+        
+        question.alternatives.forEach(function (alternative) {
+            plotAnswers.push({
+               data: [alternative.answers.length],
+                name: alternative.name,
+                id: alternative.id
+            });
+        })
+        return plotAnswers;
+    }
 
     // A reference to the question the user is currently viewing
     $scope.visibleQuestion = {};
@@ -92,8 +58,10 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     socket.on('admin:initdata', function (quiz) {
         $scope.quiz = quiz;
         $scope.visibleQuestion = $scope.quiz.questions[0] || {};
+        setPlotAnswers($scope.visibleQuestion);
     });
 
+    // Hide the solutions to the questions
     $scope.showAnswers = false;
     $scope.toggleAnswers = function () {
         $scope.showAnswers = !$scope.showAnswers;
@@ -110,6 +78,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
                 // Have to update the view if that question is being viewed
                 if ($scope.visibleQuestion._id == question._id) {
                     $scope.visibleQuestion = $scope.quiz.questions[i];
+                    setPlotAnswers($scope.visibleQuestion);
                 }
 
                 questionUpdated = true;
@@ -118,6 +87,7 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         };
         if (!questionUpdated)
             $scope.quiz.questions.push(question);
+
     });
 
     // Same method as questionChange
@@ -169,7 +139,6 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
             this.permalink = $scope.quiz.permalink;
             this.questionId = question._id;
             socket.emit('admin:addAlternative', this);
-            console.log(this);
 
             // Reset and close window
             this.name = '';
@@ -181,14 +150,8 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
     // Change the question in view
     $scope.viewQuestion = function(question) {
         $scope.visibleQuestion = question;
-        $scope.answers = $scope.visibleQuestion.answers;
+        setPlotAnswers(question);
     };
-
-    // TODO: remove this when real functionality for updating graph is in place
-    $scope.plusOne = function () {
-        socket.emit('test:newanswer', $scope.answers[0].id)
-    };
-
 
     // Create a new question for the current quiz
     $scope.newQuestion = {
@@ -236,8 +199,6 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         deactivateQuestion: function () {
             socket.emit('admin:deactivateQuestion')
         },
-        viewResponses: function() {alert("View responses")},
-        addAdmin: function() {alert("Add admin")}
     };
 });
 

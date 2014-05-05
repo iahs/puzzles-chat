@@ -44,7 +44,7 @@ block content
             button.btn.btn-primary(data-toggle='modal', data-target='#addAlternative' ng-show='quiz.questions.length') Add alternative
             button.btn(ng-click="toggleAnswers()" ng-show='quiz.questions.length') Toggle answers
 
-            question-results(answers="answers")
+            question-results(answers="plotAnswers")
             button.btn(ng-click="plusOne()") Click me
         .col-lg-4
             chatroom
