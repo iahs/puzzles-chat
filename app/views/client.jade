@@ -2,13 +2,15 @@ extends layout
 
 block content
     #client-dashboard(ng-controller='ClientDashboardController')
-        .col-md-9(ng-show='question')
+        .col-md-9
             .well
-                h3 Question:
-                h4 {{ question.question }}
-                form(name='question', ng-submit='submitAnswer()')
-                    div.q-opt.span4(ng-repeat='alternative in question.alternatives')
-                        input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')
-                        {{ alternative.name }}
-                    br
-                    button.btn.btn-primary(type="submit") Submit
+                #question(ng-show='question.question')
+                    h4 {{ question.question }}
+                    form(name='question', ng-submit='submitAnswer()')
+                        div.q-opt.span4(ng-repeat='alternative in question.alternatives')
+                            input(type='radio', value='{{ alternative.id }}', ng-model="question.selectedAnswer" name='alternative')
+                            {{ alternative.name }}
+                        br
+                        button.btn.btn-primary(type="submit") Submit
+                #noquestion(ng-hide='question.question')
+                    h4 No active question right now - hang tight!
