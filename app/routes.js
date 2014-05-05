@@ -5,7 +5,7 @@ module.exports = function(app, passport) {
     });
 
     app.get('/login', function(req, res) {
-        res.render('login', { message: req.flash('info') });
+        res.render('login', { message: req.flash('message') });
     });
 
     app.post('/login', passport.authenticate('local-login', {
@@ -29,8 +29,15 @@ module.exports = function(app, passport) {
         res.redirect('/');
     });
 
-    app.get('/quiz/:permalink', function (req, res) {
+    app.get('/quiz/:permalink', isLoggedIn, function (req, res) {
         res.render('client');
-
     });
 };
+
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+
+    req.flash('message', 'Please sign in to take quizzes');
+    res.redirect('/login ');
+}

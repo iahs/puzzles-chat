@@ -2,7 +2,7 @@ extends layout
 
 block content
     if message && message != ""
-        .alert.alert-error= message
+        .alert.alert-warning= message
     h1 Login
     form(role="form" action="/login" method="post")
         .form-group
