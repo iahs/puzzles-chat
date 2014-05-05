@@ -19,7 +19,7 @@ block content
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                     a(href="#" class="navbar-brand") Actions
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.deactivateQuestion()", ng-show="quiz.activeQuestionId==visibleQuestion._id && quiz.questions") Question on
+                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.deactivateQuestion()", ng-show="quiz.activeQuestionId==visibleQuestion._id && quiz.activeQuestionId") Question on
                     button.btn.btn-danger.navbar-btn.btn.ng-hide(ng-click="actions.activateQuestion()", ng-hide="quiz.activeQuestionId==visibleQuestion._id") Question off
                     button.btn.btn-info.navbar-btn.btn(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Chat on
                     button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Chat off
@@ -41,8 +41,8 @@ block content
                         td(ng-hide="showAnswers") *****
                         td {{ alt.answers.length }}
 
-            button.btn.btn-primary(data-toggle='modal', data-target='#addAlternative') Add alternative
-            button.btn(ng-click="toggleAnswers()") Toggle answers
+            button.btn.btn-primary(data-toggle='modal', data-target='#addAlternative' ng-show='quiz.questions.length') Add alternative
+            button.btn(ng-click="toggleAnswers()" ng-show='quiz.questions.length') Toggle answers
 
             question-results(answers="answers")
             button.btn(ng-click="plusOne()") Click me
