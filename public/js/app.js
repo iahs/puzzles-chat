@@ -144,7 +144,10 @@ app.controller('AdminQuizController', function ($scope, $window, socket) {
         if(id == $scope.visibleQuestion._id) {
             $scope.plotAnswers.forEach(function (ans){
                 if(ans.id == selection){
+                    var tempitem = ($scope.plotAnswers[0].id == ans.id ? 1 : 0);
+                    $scope.plotAnswers[tempitem].data[0] += .000001; // Infinitesimal change to avoid page-jump bug
                     ans.data[0]++;
+                    $scope.plotAnswers[tempitem].data[0] -= .000001;
                 }
             });
         }
