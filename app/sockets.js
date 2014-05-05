@@ -234,6 +234,47 @@ module.exports = function (io) {
         });
 
 
+        socket.on('client:answer', function (data) {
+            // update the answer and send it to the admin
+            console.log(data.selectedAnswer);
+            quizQuery(permalink).exec(function (err, quiz) {
+                
+                // if question is no longer the active question, do not update
+                if (!quiz.activeQuestionId.equals(quiz.questionId)) {
+                    
+                }
+
+                // loop through the alternatives to update the selected answer
+                // loop does two things:
+                //     1) save the new answer
+                //     2) remove the previously saved answer
+                for (var i = 0; i < question.alternatives.length; ++i) {
+
+                    // loop through the answers and remove the answer if it
+                    // already exists
+                    for (var j = 0; j < quiz.alternatives[i].answers.length; ++j) {
+
+                        // remove it if the answer already exists
+                        if (question.alternatives[i].answers[j] == currentUser) {
+                            question.alternatives[i].answers.splice(j, 1);
+                        }
+                    }
+                    
+                    // input the new answer
+                    if (question.alternatives[i]._id.equals(data.selectedAnswer)) {
+                        question.alternatives[i].answers.push(currentUser);
+                    }
+
+                }
+
+                quiz.save(function (err) {
+                    
+                });
+            });
+            
+        });
+
+
         /***************************
          * Classes (group of users)
          * Uses admin namespace for messages
@@ -288,6 +329,7 @@ function quizQuery(permalink) {
     return Quiz.findOne({ permalink: permalink }).populate('groups');
 };
 
+
 /* * * * * * * * * *
 * @brief: get active question for client from a quiz
 *
@@ -297,8 +339,6 @@ function quizQuery(permalink) {
 * * * * * * * * * */
 function getClientActiveQuestion(quiz) {
 
-    console.log(">>>> Getting Client question");
-
     if (!quiz.activeQuestionId) {
         console.log(">>>> NO active question!!!");
         return {};
@@ -307,14 +347,14 @@ function getClientActiveQuestion(quiz) {
     // find the active question
     for (var i = 0; i < quiz.questions.length; ++i) {
         var question = quiz.questions[i];
-        if ((question._id).toString() === (quiz.activeQuestionId).toString()) {
+        if (question._id.equals(quiz.activeQuestionId)) {
 
             // Send simple version to client
             var q = { question:question.question, alternatives:[], questionId: question._id, selectedAnswer: "" };
 
             question.alternatives.forEach(function (d) {
                 console.log(">>>>>>" + d.name);
-                q.alternatives.push({name: d.name});
+                q.alternatives.push({name: d.name, id: d.id});
             });
 
             return q;
