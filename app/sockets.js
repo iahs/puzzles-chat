@@ -231,6 +231,10 @@ module.exports = function (io) {
                 };
                 quiz.save(function (err) {
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
+                
+                    // send the updated alternatives to the client
+                    var alternatives = getClientActiveQuestion(quiz, currentUserId);
+                    io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
                 });
             });
         });
