@@ -55,8 +55,9 @@ app.controller('PlotController', function ($scope, socket) {
     };
 });
 
-app.controller('NavbarController', function ($scope) {
-    // Navbar on top of page
+app.controller('NavbarController', function ($scope, $window) {
+    $scope.currentPage = $window.location.pathname.substring($window.location.pathname.indexOf('/')+1);
+    console.log($scope.currentPage);
 });
 
 app.controller('AdminDashboardController', function ($scope) {

@@ -6,9 +6,9 @@ nav.navbar.navbar-inverse(role='navigation', ng-controller="NavbarController")
         a.navbar-brand(href='/') Puzzles
     #navbar-collapse-01.collapse.navbar-collapse
         ul.nav.navbar-nav
-            li
+            li(ng-class="{active: currentPage=='admin'}")
                 a(href='/admin') My quizzes
-            li
+            li(ng-class="{active: currentPage=='admin/groups'}")
                 a(href='/admin/groups') My groups
             li
                 a(href='/logout') Sign out
