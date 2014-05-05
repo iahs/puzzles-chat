@@ -117,6 +117,7 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
 
                 if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
                 };
 
@@ -128,9 +129,12 @@ module.exports = function (io) {
         });
 
         socket.on('admin:activateQuestion', function (question) {
-
             // Mongo update does not work
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
@@ -142,6 +146,10 @@ module.exports = function (io) {
         socket.on('admin:deactivateQuestion', function () {
             // There can only be one active
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.activeQuestionId = null;
                 quiz.save();
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionDeactivated');
@@ -154,9 +162,14 @@ module.exports = function (io) {
 
             // TODO: format the question properly before pushing it into the database
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!canEditQuiz(currentUserId, quiz)) {
+                    socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
+                    return;
+                };
                 quiz.questions.push(question);
                 quiz.save(function () {
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', quiz.questions[quiz.questions.length-1]);
+                    socket.emit('flash:message', {type: 'success', message: 'Question added'});
                 });
             });
         });
