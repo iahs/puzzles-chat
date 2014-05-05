@@ -143,17 +143,14 @@ module.exports = function (io) {
             quizQuery(permalink).exec(function (err, quiz) {
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
-<<<<<<< HEAD
                 io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
+                io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
 
                 // Send simple version to client
                 var alternatives = getClientActiveQuestion(quiz);
 
                 io.sockets.in(permalink).emit('client:questionActivated', alternatives);
 
-=======
-                io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
->>>>>>> 630eaa630576e7e9c8e233484b463893cdf8ffbc
             });
 
             // TODO: send some message to the chat directive
@@ -291,7 +288,6 @@ function quizQuery(permalink) {
     return Quiz.findOne({ permalink: permalink }).populate('groups');
 };
 
-<<<<<<< HEAD
 /* * * * * * * * * *
 * @brief: get active question for client from a quiz
 *
@@ -335,7 +331,6 @@ function getClientActiveQuestion(quiz) {
 }
 
 
-=======
 /**
  * Super simple check too see if
  * a string resembles an email
@@ -355,4 +350,3 @@ function validateEmail(email) {
 function canEditQuiz(userId, quiz) {
     return quiz.owner.equals(userId);
 }
->>>>>>> 630eaa630576e7e9c8e233484b463893cdf8ffbc
