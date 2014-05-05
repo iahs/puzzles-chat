@@ -147,14 +147,11 @@ module.exports = function (io) {
                 };
                 quiz.activeQuestionId = mongoose.Types.ObjectId(question._id);
                 quiz.save();
-                io.sockets.in(admin_prefix+permalink).emit('admin:questionActivated', question);
                 io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionActivated', question);
 
                 // Send simple version to client
                 var alternatives = getClientActiveQuestion(quiz);
-
-                io.sockets.in(permalink).emit('client:questionActivated', alternatives);
-
+                io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
             });
 
             // TODO: send some message to the chat directive
