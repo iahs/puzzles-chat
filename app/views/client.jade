@@ -7,12 +7,11 @@ block content
             .well
                 #question(ng-show='question.question')
                     h4(mathjax-bind="question.question")
-                    form(name='question', ng-submit='submitAnswer()')
-                        label(ng-repeat="alternative in question.alternatives"  class="radio")
-                            input(type="radio" ng-model="question.selectedAnswer" value="{{ alternative.id }}" name="alternative")
-                            span(mathjax-bind="alternative.name")
-                        br
-                        button.btn.btn-primary(type="submit") Submit
+                    label(ng-repeat="alternative in question.alternatives"  class="radio" ng-click="chooseAnswer(alternative.id)")
+                        input(type="radio" name="alternative" ng-disabled='question.submitted')
+                        span(mathjax-bind="alternative.name")
+                    br
+                    button.btn.btn-primary(ng-click='submitAnswer()' ng-disabled='question.submitted') Submit
                 #noquestion(ng-hide='question.question')
                     h4 No active question right now - hang tight!
         .col-lg-4

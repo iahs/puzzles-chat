@@ -29,10 +29,14 @@ app.controller('ClientDashboardController', function ($scope, $window, socket, $
         $scope.question = {};
     });
 
+    $scope.chooseAnswer = function (id) { // This should be in a directive, but that's overkill
+        $scope.question.selectedAnswer = id;
+    }
+
     $scope.submitAnswer = function () {
         if (!$scope.question.selectedAnswer) return;
-
-        // send the selectedAnswer back
         socket.emit('client:answer', $scope.question);
+        $scope.question.submitted = true;
     };
+
 });

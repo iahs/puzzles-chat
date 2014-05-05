@@ -33,7 +33,8 @@ module.exports = function (io) {
         var permalink,
             currentUser = socket.handshake.user.local.username || socket.handshake.user.local.email,
             currentUserId = socket.handshake.user._id,
-            currentUserEmail = socket.handshake.user.local.email
+            currentUserEmail = socket.handshake.user.local.email,
+            currentUserObj = socket.handshake.user;
 
         /**
          * Join a room for a specific quiz
@@ -248,59 +249,32 @@ module.exports = function (io) {
 
         socket.on('client:answer', function (data) {
             // update the answer and send it to the admin
-            console.log(JSON.stringify(data));
-            console.log(data.selectedAnswer);
             quizQuery(permalink).exec(function (err, quiz) {
-
-                console.log(JSON.stringify(quiz));
-
                 // if question is no longer the active question, do not update
-                if (!(data.questionId == quiz.activeQuestionId)) {
-                    console.log("It is not equal");
+                if (data.questionId != quiz.activeQuestionId || err) {
                     return;
                 }
-                else {
 
-                    var question = null;
-                    // find the active question
-                    for (var i = 0; i < quiz.questions.length; ++i) {
-                        if (quiz.questions[i]._id.equals(quiz.activeQuestionId)) {
-                            question = quiz.questions[i];
-                        }
-                    };
-
-                    if (!question) {
-                        // XXX: Debug, question does not exist
-                        return;
+                var question = null;
+                // find the active question
+                for (var qid = 0; qid < quiz.questions.length; qid++) {
+                    if (quiz.questions[qid]._id.equals(quiz.activeQuestionId)) {
+                        question = quiz.questions[qid];
+                        break;
                     }
+                };
 
-                    // loop through the alternatives to update the selected answer
-                    // loop does two things:
-                    //     1) save the new answer
-                    //     2) remove the previously saved answer
-                    for (var i = 0; i < question.alternatives.length; ++i) {
-
-                        // loop through the answers and remove the answer if it
-                        // already exists
-                        for (var j = 0; j < question.alternatives[i].answers.length; ++j) {
-
-                            // remove it if the answer already exists
-                            if (question.alternatives[i].answers[j] == currentUser) {
-                                question.alternatives[i].answers.splice(j, 1);
-                            }
-                        }
-
-                        // input the new answer
-                        if (question.alternatives[i]._id.equals(data.selectedAnswer)) {
-                            question.alternatives[i].answers.push(currentUser);
-                        }
-
-                    }
-
-                    quiz.save(function (err) {
-
-                    });
+                if (!question) {
+                    // XXX: Debug, question does not exist
+                    return;
                 }
+
+                var queryObj = {permalink: permalink},
+                 updateObj = {$push: {}};
+                queryObj["questions." + qid + ".alternatives._id"] = data.selectedAnswer;
+                updateObj.$push["questions." + qid + ".alternatives.$.answers"] = currentUserObj;
+
+                 Quiz.update( queryObj, updateObj, function(err, result){ });
             });
 
         });
