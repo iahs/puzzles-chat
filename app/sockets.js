@@ -231,7 +231,7 @@ module.exports = function (io) {
                 };
                 quiz.save(function (err) {
                     io.sockets.in(roomName(permalink, 'admin')).emit('admin:questionChange', updatedQuestion);
-                
+
                     // send the updated alternatives to the client
                     var alternatives = getClientActiveQuestion(quiz, currentUserId);
                     io.sockets.in(roomName(permalink, 'client')).emit('client:questionActivated', alternatives);
@@ -269,16 +269,14 @@ module.exports = function (io) {
         socket.on('client:answer', function (data) {
             // update the answer and send it to the admin
             quizQuery(permalink).exec(function (err, quiz) {
-                // if question is no longer the active question, do not update
-                if (!quiz || data.questionId != quiz.activeQuestionId || err) {
-                    socket.emit('flash:message', { type: 'warning', message: 'Question has been closed'});
+                if (!quiz || err) {
                     return;
                 }
 
                 var question = null;
                 // find the active question
                 for (var qid = 0; qid < quiz.questions.length; qid++) {
-                    if (quiz.questions[qid]._id.equals(quiz.activeQuestionId)) {
+                    if (quiz.questions[qid]._id.equals(data.questionId)) {
                         question = quiz.questions[qid];
                         break;
                     }
