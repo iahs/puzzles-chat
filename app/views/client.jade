@@ -6,7 +6,8 @@ block content
             h2  {{ quizName }}
             .well
                 #question(ng-show='question.question')
-                    h4(mathjax-bind="question.question")
+                    h4 {{question.name}}
+                    p(mathjax-bind="question.question")
                     label(ng-repeat="alternative in question.alternatives"  class="radio" ng-click="chooseAnswer(alternative.id)")
                         input(type="radio" name="alternative" ng-disabled='question.submitted')
                         span(mathjax-bind="alternative.name")

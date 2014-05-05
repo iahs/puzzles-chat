@@ -136,7 +136,7 @@ module.exports = function (io) {
                 io.sockets.in(roomName(permalink, 'chat')).emit('admin:chatStatusUpdated', isActive);
             });
         });
-        
+
         socket.on('admin:setQuizPrivacy', function (status) {
 
             quizQuery(permalink).exec(function (err, quiz) {
@@ -144,8 +144,8 @@ module.exports = function (io) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
                 };
-                
-                
+
+
                 quiz.isPrivate = !quiz.isPrivate;
                 quiz.save();
                 io.sockets.in(roomName(permalink,
@@ -370,7 +370,7 @@ function getClientActiveQuestion(quiz, currentUserId) {
         if (question._id.equals(quiz.activeQuestionId)) {
 
             // Send simple version to client
-            var q = { question:question.question, alternatives:[], questionId: question._id, selectedAnswer: "" };
+            var q = { question:question.question, alternatives:[], questionId: question._id, selectedAnswer: "", name:question.name };
 
             question.alternatives.forEach(function (d) {
                 q.alternatives.push({name: d.name, id: d.id});
