@@ -8,18 +8,20 @@
             </li>
         </ul>
     </div>
+    <div ng-show="chatEnabled">
+        <form role="form" ng-submit="sendMessage()">
+            <div class="form-group">
+                <input ng-model="newMessage.title" type="text" placeholder="Message..." class="form-control" ng-disabled="activeTopic === undefined" />
+                <button class="btn btn-primary" ng-disabled="activeTopic === undefined">Post response</button>
+            </div>
+        </form>
 
-    <form role="form" ng-submit="sendMessage()">
-        <div class="form-group">
-            <input ng-model="newMessage.title" type="text" placeholder="Message..." class="form-control" ng-disabled="activeTopic === undefined" />
-            <button class="btn btn-primary" ng-disabled="activeTopic === undefined">Post response</button>
-        </div>
-    </form>
-
-    <form role="form" ng-submit="createTopic()" ng-show="chatEnabled">
-        <div class="form-group">
-            <input ng-model="newTopic.title" type="text" placeholder="New topic..." class="form-control"/>
-            <button class="btn btn-primary">Ask new question</button>
-        </div>
-    </form>
+        <form role="form" ng-submit="createTopic()">
+            <div class="form-group">
+                <input ng-model="newTopic.title" type="text" placeholder="New topic..." class="form-control"/>
+                <button class="btn btn-primary">Ask new question</button>
+            </div>
+        </form>
+    </div>
+    <div ng-hide="chatEnabled"><i>Chat has been disabled</i></div>
 </div>

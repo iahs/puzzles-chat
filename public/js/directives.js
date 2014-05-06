@@ -68,13 +68,14 @@ app.directive('chatroom', function () {
 
             // Chat enable/disable
             socket.on('admin:chatStatusUpdated', function(status){
-                $scope.chatEnabled = status;
+                $scope.chatEnabled = status || $scope.isAdmin;
             });
 
-            socket.on('admin:privacyStatusUpdated', function (status) {
-                $scope.privacy = status;
+            // Let admins chat
+            socket.on('chatserver:isAdmin', function(status){
+                $scope.isAdmin = status;
+                $scope.chatEnabled = true;
             });
-
         }
     }
 });

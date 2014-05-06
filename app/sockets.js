@@ -65,6 +65,7 @@ module.exports = function (io) {
                         socket.join(roomName(permalink, 'admin'));
                         // send admin init data
                         socket.emit( 'admin:initdata', quiz );
+                        socket.emit( 'chatserver:isAdmin', true );
                     } else {
                         socket.emit('flash:message', {type: 'danger', message: "You do not have admin permissions for this quiz"});
                     }
