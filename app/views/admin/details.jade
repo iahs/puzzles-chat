@@ -2,9 +2,7 @@ extends ../layout
 
 block content
     h1 Details for #{quiz.name}
-    h5 Description
     p= quiz.description
-    h2 Questions
     - each question in quiz.questions
         h3= question.name
         p= question.description
@@ -24,5 +22,3 @@ block content
                         td= answer.owner.local.email
                         td= answer.answer
                         td= answer.isCorrect
-
-

@@ -18,12 +18,12 @@ block content
                 .navbar-header
                     button(data-target="#navbar-collapse-admin" data-toggle="collapse" class="navbar-toggle" type="button")
                 #navbar-collapse-admin.collapse.navbar-collapse
-                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.deactivateQuestion()", ng-show="quiz.activeQuestionId==visibleQuestion._id && quiz.activeQuestionId") Question on
-                    button.btn.btn-danger.navbar-btn.btn.ng-hide(ng-click="actions.activateQuestion()", ng-hide="quiz.activeQuestionId==visibleQuestion._id") Question off
-                    button.btn.btn-info.navbar-btn.btn(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Chat on
-                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Chat off
-                    button.btn.btn-danger.navbar-btn.btn(ng-click="actions.setQuizPrivacy(false)", ng-show="quiz.isPrivate") Private Quiz
-                    button.btn.btn-primary.navbar-btn.ng-hide(ng-click="actions.setQuizPrivacy(true)", ng-hide="quiz.isPrivate") Public Quiz
+                    button.btn.btn-success.navbar-btn.btn(ng-click="actions.deactivateQuestion()", ng-show="quiz.activeQuestionId==visibleQuestion._id && quiz.activeQuestionId") Question is on
+                    button.btn.btn-danger.navbar-btn.btn.ng-hide(ng-click="actions.activateQuestion()", ng-hide="quiz.activeQuestionId==visibleQuestion._id") Question is off
+                    button.btn.btn-info.navbar-btn.btn(ng-click="actions.setChatStatus(false)", ng-show="quiz.chatIsActive") Chat is on
+                    button.btn.btn-danger.navbar-btn.ng-hide(ng-click="actions.setChatStatus(true)", ng-hide="quiz.chatIsActive") Chat is off
+                    button.btn.btn-danger.navbar-btn.btn(ng-click="actions.setQuizPrivacy(false)", ng-show="quiz.isPrivate") Quiz is private
+                    button.btn.btn-primary.navbar-btn.ng-hide(ng-click="actions.setQuizPrivacy(true)", ng-hide="quiz.isPrivate") Quiz is public
 
 
                     a.btn.btn-warning.navbar-btn(ng-href="/admin/quiz/{{quiz.permalink}}/details") Details
