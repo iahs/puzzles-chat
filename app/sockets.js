@@ -337,9 +337,12 @@ module.exports = function (io) {
         });
 
         socket.on('admin:manage_group', function (permalink) {
-            // Todo: check group owner vs user id for access
             Group.findOne({ permalink: permalink }, function (err, group) {
-                socket.emit('admin:groupData', group)
+                if (group.owner.equals(currentUserId)) {
+                    socket.emit('admin:groupData', group)
+                } else {
+                    socket.emit('flash:message', { type: 'danger', message: 'You are not allowed to manage this group'})
+                }
             });
         });
     });

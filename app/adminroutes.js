@@ -9,7 +9,7 @@ module.exports = function(app) {
      */
     app.get('/admin', isLoggedIn, function(req, res) {
         Quiz.find({ owner: req.user._id }, function (err, quizzes) {
-            res.render('admin/index', { user: req.user, quizzes: quizzes });
+            res.render('admin/index', { user: req.user, quizzes: quizzes, message: req.flash('message') });
         });
     });
 
@@ -25,7 +25,7 @@ module.exports = function(app) {
     app.get('/admin/quiz/:permalink', isLoggedIn, function (req, res) {
         Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
            if (quiz) {
-               // TODO: add authentication here to check that user is admin for quiz
+               // Authentication is handled via sockets
                res.render('admin/show');
            } else {
                res.render('admin/new', { permalink: req.params.permalink });
@@ -50,10 +50,10 @@ module.exports = function(app) {
                         return a<b;
                     });
                 });
-                // TODO: add authentication here to check that user is admin for quiz
                 res.render('admin/details', {quiz: quiz});
             } else {
-                res.send("Not found or access denied");
+                req.flash('message', "You are not allowed to view details for this quiz");
+                res.redirect('/admin');
             };
         });
     });
@@ -65,7 +65,8 @@ module.exports = function(app) {
         Quiz.findOne({permalink: req.params.permalink}, function (err, oquiz) {
             if (oquiz) {
                 // The permalink is already taken
-                res.redirect('/admin'); // TODO: add a flash message
+                req.flash('message', 'This permalink is already taken');
+                res.redirect('/admin');
             } else  {
                 var quiz = new Quiz();
                 quiz.name = req.body.name;
@@ -96,8 +97,12 @@ module.exports = function(app) {
     app.get('/admin/group/:permalink', isLoggedIn, function (req, res) {
         Group.findOne({permalink: req.params.permalink}, function(err, group) {
             if (group) {
-                // TODO: add authentication here to check that user is admin for quiz
-                res.render('admin/group');
+                if (group.owner.equals(req.user._id)) {
+                    res.render('admin/group');
+                } else {
+                    req.flash('message', 'You are not allowed to edit the group ' + group.permalink);
+                    res.redirect('/admin');
+                }
             } else {
                 res.render('admin/newGroup', { permalink: req.params.permalink });
             };
@@ -110,8 +115,8 @@ module.exports = function(app) {
     app.post('/admin/group/:permalink', isLoggedIn, function (req, res) {
         Group.findOne({permalink: req.params.permalink}, function (err, ogroup) {
             if (ogroup) {
-                // The permalink is already taken
-                res.redirect('/admin'); // TODO: add a flash message
+                req.flash('message', 'The permalink ' + group.permalink + ' is already taken for groups');
+                res.redirect('/admin');
             } else  {
                 var group = new Group();
                 group.name = req.body.name;
