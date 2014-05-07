@@ -59,6 +59,10 @@ module.exports = function (io) {
 
             // Get the quiz object for authorization of users
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!quiz || err) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find quiz " + permalink});
+                    return;
+                };
                 if (room.admin === true) {
                     // The user requested admin rights
                     if (quiz.owner.equals(currentUserId)) {
@@ -99,6 +103,10 @@ module.exports = function (io) {
             socket.join(roomName(permalink, 'chat'));
             socket.emit('chatserver:roomStatus',rooms[permalink]);
             quizQuery(permalink).exec(function (err, quiz) {
+                if (!quiz || err) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find quiz " + permalink});
+                    return;
+                };
                 if(quiz) socket.emit('admin:chatStatusUpdated', quiz.chatIsActive);
             });
         });
@@ -186,8 +194,6 @@ module.exports = function (io) {
         });
 
         socket.on('admin:addQuestion', function (question) {
-            if (!permalink)
-                return;
             quizQuery(permalink).exec(function (err, quiz) {
                 if (!canEditQuiz(currentUserId, quiz)) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
@@ -215,7 +221,7 @@ module.exports = function (io) {
             console.log("Alternative added!")
             console.log(alternative);
             quizQuery(permalink).exec(function (err, quiz) {
-                if (!quiz) {
+                if (!quiz || err) {
                     socket.emit('flash:message', {type: 'warning', message: "Could not find quiz " + permalink});
                     return;
                 };
@@ -268,8 +274,9 @@ module.exports = function (io) {
             // update the answer and send it to the admin
             quizQuery(permalink).exec(function (err, quiz) {
                 if (!quiz || err) {
+                    socket.emit('flash:message', {type: 'warning', message: "Could not find quiz " + permalink});
                     return;
-                }
+                };
 
                 var question = null;
                 // find the active question
@@ -327,6 +334,9 @@ module.exports = function (io) {
 
         socket.on('admin:group:removeMember', function (data) {
           Group.findOne({permalink: data.permalink}, function (err, group) {
+              if (!group) {
+                  socket.emit('flash:message', {type: 'danger', message: "Could not find group"});
+              };
               var index = group.members.indexOf(data.email);
               group.members.splice(index, 1);
               group.save(function (err) {
@@ -337,6 +347,9 @@ module.exports = function (io) {
 
         socket.on('admin:manage_group', function (permalink) {
             Group.findOne({ permalink: permalink }, function (err, group) {
+                if (!group) {
+                    socket.emit('flash:message', {type: 'danger', message: "Could not find group"});
+                };
                 if (group.owner.equals(currentUserId)) {
                     socket.emit('admin:groupData', group)
                 } else {
