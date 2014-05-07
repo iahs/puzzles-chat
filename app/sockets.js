@@ -69,7 +69,7 @@ module.exports = function (io) {
                     } else {
                         socket.emit('flash:message', {type: 'danger', message: "You do not have admin permissions for this quiz"});
                     }
-                } else if (quiz.isPrivate) {
+                } else if (quiz && quiz.isPrivate) {
                     // The user tried to join a private quiz as a client
                     var hasAccess = false;
                     for (var i=0; i<quiz.groups.length; i++) {
@@ -145,7 +145,6 @@ module.exports = function (io) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
                     return;
                 };
-
 
                 quiz.isPrivate = !quiz.isPrivate;
                 quiz.save();
