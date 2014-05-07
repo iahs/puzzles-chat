@@ -189,8 +189,6 @@ module.exports = function (io) {
         socket.on('admin:addQuestion', function (question) {
             if (!permalink)
                 return;
-
-            // TODO: format the question properly before pushing it into the database
             quizQuery(permalink).exec(function (err, quiz) {
                 if (!canEditQuiz(currentUserId, quiz)) {
                     socket.emit('flash:message', {type: 'danger', message: 'You are not allowed to edit this quiz'});
@@ -352,7 +350,6 @@ module.exports = function (io) {
  * @returns {*}
  */
 function quizQuery(permalink) {
-    // Todo: move populate to where we need it
     return Quiz.findOne({ permalink: permalink }).populate('groups');
 };
 

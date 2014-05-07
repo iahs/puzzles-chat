@@ -29,7 +29,7 @@ module.exports = function(app) {
                res.render('admin/show');
            } else {
                res.render('admin/new', { permalink: req.params.permalink });
-           };
+           }
         });
     });
     app.get('/admin/quiz/:permalink/details', isLoggedIn, function (req, res) {
@@ -141,7 +141,6 @@ module.exports = function(app) {
     // Editing and updating is done over sockets
 };
 
-// TODO: refactor and merge with method
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();

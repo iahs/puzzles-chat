@@ -36,7 +36,13 @@ module.exports = function(app, passport) {
     });
 
     app.get('/quiz/:permalink', isLoggedIn, function (req, res) {
-        res.render('client');
+        Quiz.findOne({permalink: req.params.permalink}, function(err, quiz) {
+           if (quiz) {
+               res.render('client');
+           } else {
+               res.render('admin/new', { permalink: req.params.permalink });
+           }
+        });
     });
 };
 
